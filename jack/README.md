@@ -13,3 +13,8 @@ pip install -r requirements.txt
 ```bash
 python -m pytest tests/test_loader.py -v
 ```
+# jack
+
+Deterministic Bank Nifty intraday backtesting engine
+
+Built with Claude Code
