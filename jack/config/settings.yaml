@@ -1,0 +1,35 @@
+data:
+  base_path: "./data/raw/"
+  timeframes:
+    - "1d"
+    - "2h"
+    - "1h"
+    - "15m"
+    - "5m"
+    - "1m"
+  file_pattern: "bank-nifty-{timeframe}-data.csv"
+splits:
+  train:
+    start: "2015-01-01"
+    end: "2020-12-31"
+  test:
+    start: "2021-01-01"
+    end: "2022-12-31"
+  holdout:
+    start: "2023-01-01"
+    end: "2024-04-12"
+trading:
+  initial_capital: 1000000
+  max_risk_per_trade_pct: 1.0
+  max_daily_drawdown_pct: 2.0
+  max_total_drawdown_pct: 20.0
+  max_trades_per_day: 2
+  brokerage_pct: 0.03
+  stt_sell_pct: 0.025
+  slippage_ticks: 1
+  tick_size: 0.05
+market:
+  open_time: "09:15"
+  close_time: "15:30"
+  instrument: "BANKNIFTY"
+  lot_size: 15
