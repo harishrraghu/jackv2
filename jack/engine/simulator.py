@@ -261,6 +261,99 @@ class Simulator:
 
         return results
 
+    def run_single_day(self, day_data: dict, lookback: dict, verbose: bool = False, briefing_only: bool = False) -> dict:
+        """
+        Run simulation for a single trading day.
+        Designed for live/paper trading where we only have today's data and past lookback.
+        
+        Args:
+            day_data: Dict of DataFrames for the current day ("date", "daily", "15m", etc).
+            lookback: Dict of historical data before today.
+            verbose: Print details.
+            
+        Returns:
+            Dict containing the briefing, trades, and end-of-day capital state.
+        """
+        date = day_data["date"]
+        self.risk_manager.reset_daily()
+        self.scorer.clear_log()
+
+        # Combine lookback daily and today's daily to compute indicators correctly
+        lb_daily = lookback.get("1d", pd.DataFrame())
+        today_daily = day_data.get("daily", pd.DataFrame())
+        
+        if not lb_daily.empty and not today_daily.empty:
+            combined_daily = pd.concat([lb_daily, today_daily], ignore_index=True)
+            combined_idx = len(combined_daily) - 1 # Today is the last row
+        elif not today_daily.empty:
+            combined_daily = today_daily
+            combined_idx = 0
+        else:
+            return {"error": "no_daily_data"}
+
+        # Compute daily indicators
+        daily_with_indicators = self._compute_daily_indicators(combined_daily)
+        
+        # Get today's indicator values (the last row)
+        today_indicators = self._get_today_indicators(daily_with_indicators, date, lookback)
+
+        # Compute intraday indicators
+        orb_data = orb_single_day(day_data.get("15m", pd.DataFrame()))
+        fh_data = fh_single_day(day_data.get("1h", pd.DataFrame()))
+
+        # Build morning briefing
+        briefing = self._build_briefing(
+            date, today_indicators, orb_data, fh_data, lookback
+        )
+
+        # Run filter stack
+        filters = run_filter_stack(
+            date,
+            lookback_daily={
+                "Bull_Streak": today_indicators.get("Bull_Streak", 0),
+                "Bear_Streak": today_indicators.get("Bear_Streak", 0),
+                "avg_ATR_60d": today_indicators.get("avg_ATR_60d", None),
+            },
+            indicators={
+                "RSI": today_indicators.get("RSI"),
+                "hourly_RSI": None, # Will be computed locally if needed
+                "ATR": today_indicators.get("ATR"),
+                "Regime": today_indicators.get("Regime", "normal"),
+            },
+        )
+        briefing["filters"] = filters
+        
+        if briefing_only:
+            return {"date": date, "briefing": briefing}
+
+        # Simulate intraday
+        day_trades = self._simulate_intraday(
+            day_data, briefing, date, today_indicators,
+            orb_data, fh_data, filters, verbose,
+        )
+
+        capital_state = self.risk_manager.get_state()
+
+        try:
+            self.journal.log_day(
+                date=date,
+                briefing=briefing,
+                trade_events=day_trades,
+                decision_log=self.scorer.get_decision_log(),
+                capital_state=capital_state,
+            )
+        except Exception as e:
+            print(f"  [WARN] Journal write failed: {e}", file=sys.stderr)
+
+        return {
+            "date": date,
+            "briefing": briefing,
+            "trades": day_trades,
+            "decision_log": self.scorer.get_decision_log(),
+            "capital_state": capital_state,
+            "daily_pnl": self.risk_manager.daily_pnl
+        }
+
     def _compute_daily_indicators(self, daily: pd.DataFrame) -> pd.DataFrame:
         """Pre-compute all daily indicators."""
         df = daily.copy()

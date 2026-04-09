@@ -7,7 +7,7 @@ Wait for bearish confirmation in first 15m candle before shorting.
 Parameters (4 of 5 budget):
     min_gap_up_pct: 0.75
     partial_target_ratio: 0.6
-    stop_buffer_pts: 20
+    atr_stop_multiplier: 1.0
     max_hold_time: "11:30"
 """
 
@@ -23,14 +23,14 @@ class GapUpFade(Strategy):
         default_params = {
             "min_gap_up_pct": 0.75,
             "partial_target_ratio": 0.6,
-            "stop_buffer_pts": 20,
+            "atr_stop_multiplier": 1.0,
             "max_hold_time": "11:30",
         }
         if params:
             default_params.update(params)
 
         super().__init__(name="gap_up_fade", params=default_params)
-        self.required_indicators = ["gap", "orb", "rsi", "ema", "adx"]
+        self.required_indicators = ["gap", "orb", "rsi", "ema", "adx", "atr"]
         self.eligible_timeframes = ["09:30-10:15"]
 
     def check_entry(
@@ -82,11 +82,15 @@ class GapUpFade(Strategy):
         if current_price <= 0 or prev_close <= 0:
             return None
 
+        atr = daily.get("ATR")
+        if atr is None or atr <= 0:
+            return None
+
         gap_size = current_price - prev_close
         partial_ratio = self.params["partial_target_ratio"]
 
         entry_price = current_price
-        stop_loss = day_high + self.params["stop_buffer_pts"]
+        stop_loss = entry_price + (atr * self.params["atr_stop_multiplier"])
         target_1 = entry_price - (gap_size * partial_ratio)  # Partial gap fill
         target_2 = prev_close  # Full gap fill
 

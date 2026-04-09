@@ -59,7 +59,7 @@ class RiskManager:
         self.trades_today = 0
         self.open_position: Optional[dict] = None
 
-    def calculate_position_size(self, entry_price: float, stop_loss: float) -> int:
+    def calculate_position_size(self, entry_price: float, stop_loss: float, risk_override_pct: float = None) -> int:
         """
         Calculate position size based on risk budget.
 
@@ -84,14 +84,15 @@ class RiskManager:
         if stop_distance <= 0:
             return 0
 
-        risk_amount = self.current_capital * self.max_risk_per_trade_pct / 100
+        risk_pct = risk_override_pct if risk_override_pct is not None else self.max_risk_per_trade_pct
+        risk_amount = self.current_capital * risk_pct / 100
         raw_quantity = risk_amount / stop_distance
 
         # Round DOWN to nearest lot_size multiple
         lots = int(raw_quantity // self.lot_size)
 
-        # Cap at 10 lots max (prevents catastrophic sizing from tight stops)
-        max_lots = 10
+        # Cap at 30 lots max to prevent catastrophic sizing, while allowing core alpha to scale
+        max_lots = 30
         lots = min(lots, max_lots)
 
         quantity = lots * self.lot_size
@@ -174,7 +175,9 @@ class RiskManager:
 
         # Check position size if signal provided
         if signal is not None:
-            qty = self.calculate_position_size(signal.entry_price, signal.stop_loss)
+            risk_mult = signal.metadata.get("risk_multiplier", 1.0)
+            adjusted_risk_pct = self.max_risk_per_trade_pct * risk_mult
+            qty = self.calculate_position_size(signal.entry_price, signal.stop_loss, adjusted_risk_pct)
             if qty == 0:
                 return False, "insufficient_capital_for_stop"
 
@@ -192,7 +195,9 @@ class RiskManager:
         Returns:
             Position dict with all trade details.
         """
-        quantity = self.calculate_position_size(signal.entry_price, signal.stop_loss)
+        risk_mult = signal.metadata.get("risk_multiplier", 1.0)
+        adjusted_risk_pct = self.max_risk_per_trade_pct * risk_mult
+        quantity = self.calculate_position_size(signal.entry_price, signal.stop_loss, adjusted_risk_pct)
 
         # Apply entry slippage (worse price for trader)
         slippage_amount = self.slippage_ticks * self.tick_size

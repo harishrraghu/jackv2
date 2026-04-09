@@ -44,6 +44,9 @@ class StreakFade(Strategy):
 
         Uses YESTERDAY's streak values from lookback.
         """
+        # Disabled per analysis: 25% win rate and causes major drawdowns
+        return None
+
         daily = indicators.get("daily", {})
         lookback_daily = indicators.get("lookback_daily", {})
 

@@ -131,6 +131,7 @@ class FirstHourVerdict(Strategy):
                 "fh_direction": fh_direction,
                 "atr": atr,
                 "rsi": rsi,
+                "risk_multiplier": 2.5,  # scale this strategy because it's core alpha
             },
         )
 
@@ -242,6 +243,6 @@ class FirstHourVerdict(Strategy):
         if regime in ("trending_strong", "trending_weak"):
             score *= 1.15
         elif regime == "squeeze":
-            score *= 0.8
+            score *= 1.5  # Boosted by AI Retrospective (90% Win Rate)
 
         return min(score, 2.0)

@@ -1,0 +1,10 @@
+{
+  "current_date": "2021-01-04",
+  "capital": 1000000,
+  "peak_capital": 1000000,
+  "open_position": null,
+  "drawdown": {
+    "current_drawdown_pct": 0.0,
+    "daily_drawdown_pct": 0.0
+  }
+}

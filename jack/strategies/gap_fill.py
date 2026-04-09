@@ -56,6 +56,11 @@ class GapFill(Strategy):
         if gap_type != "small_down":
             return None
 
+        # Block entry in losing regimes identified by AI Retrospective
+        regime = filters.get("regime", "normal")
+        if regime in ["ranging", "squeeze", "trending_weak"]:
+            return None
+
         # Verify gap size is within range
         abs_gap = abs(gap_pct)
         if abs_gap < self.params["min_gap_pct"] or abs_gap > self.params["max_gap_pct"]:
@@ -77,8 +82,8 @@ class GapFill(Strategy):
         stop_loss = orb_low - self.params["stop_buffer_pts"]
         target = prev_close  # Gap fill level
 
-        # Not enough reward
-        if target - entry_price < 20:
+        # Not enough reward (increased from 20 to 40 to overcome fixed costs)
+        if target - entry_price < 40:
             return None
 
         return TradeSignal(
@@ -97,6 +102,7 @@ class GapFill(Strategy):
                 "gap_type": gap_type,
                 "orb_low": orb_low,
                 "prev_close": prev_close,
+                "risk_multiplier": 0.5,  # scale down risk to reduce quantity/costs
             },
         )
 
