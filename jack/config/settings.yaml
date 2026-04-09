@@ -27,7 +27,7 @@ trading:
   max_total_drawdown_pct: 25.0
   max_trades_per_day: 2
   brokerage_pct: 0.03
-  stt_sell_pct: 0.025
+  stt_sell_pct: 0.0125  # Futures STT rate (not equity delivery 0.025%)
   slippage_ticks: 1
   tick_size: 0.05
 

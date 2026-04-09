@@ -65,6 +65,7 @@ class Strategy(ABC):
         indicators: dict,
         current_time: str,
         filters: dict,
+        diagnostics: dict = None,
     ) -> Optional[TradeSignal]:
         """
         Check if entry conditions are met.
@@ -127,7 +128,7 @@ class Strategy(ABC):
         Raises:
             ValueError: If more than max_params tunable parameters exist.
         """
-        tunable = [k for k, v in self.params.items() if isinstance(v, (int, float))]
+        tunable = [k for k, v in self.params.items() if isinstance(v, (int, float)) and not isinstance(v, bool)]
         if len(tunable) > self.max_params:
             raise ValueError(
                 f"Strategy '{self.name}' has {len(tunable)} tunable params "

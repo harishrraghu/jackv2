@@ -40,6 +40,7 @@ class GapUpFade(Strategy):
         indicators: dict,
         current_time: str,
         filters: dict,
+        diagnostics: dict = None,
     ) -> Optional[TradeSignal]:
         """
         Check entry for gap-up fade.
@@ -54,11 +55,16 @@ class GapUpFade(Strategy):
         gap_pct = gap.get("Gap_Pct", 0)
         gap_type = gap.get("Gap_Type", "flat")
 
+        base_condition = gap_pct >= self.params["min_gap_up_pct"]
+        if diagnostics is not None: diagnostics["base_condition_met"] = base_condition
+
         # Must be a large gap up
         if gap_type != "large_up":
+            if diagnostics is not None: diagnostics["reason_skipped"] = f"gap_type={gap_type}_not_large_up"
             return None
 
-        if gap_pct < self.params["min_gap_up_pct"]:
+        if not base_condition:
+            if diagnostics is not None: diagnostics["reason_skipped"] = f"gap_pct_below_threshold"
             return None
 
         # Trend filter to prevent fading gap-ups in strong bull runs
@@ -73,6 +79,7 @@ class GapUpFade(Strategy):
         # Ignore second candle fallback, require first to be bearish
         first_candle_bearish = not orb.get("ORB_Bullish", True)
         if not first_candle_bearish:
+            if diagnostics is not None: diagnostics["reason_skipped"] = "first_candle_bullish"
             return None
 
         current_price = indicators.get("current_price", 0)
@@ -98,7 +105,12 @@ class GapUpFade(Strategy):
         risk = stop_loss - entry_price
         reward = entry_price - target_1
         if risk <= 0 or (reward / risk) < 1.5:
+            if diagnostics is not None: diagnostics["reason_skipped"] = "poor_rr"
             return None
+
+        if diagnostics is not None:
+            diagnostics["signal_generated"] = True
+            diagnostics["reason_skipped"] = None
 
         return TradeSignal(
             strategy_name=self.name,

@@ -38,6 +38,7 @@ class StreakFade(Strategy):
         indicators: dict,
         current_time: str,
         filters: dict,
+        diagnostics: dict = None,
     ) -> Optional[TradeSignal]:
         """
         Check entry for streak fade.
@@ -45,6 +46,7 @@ class StreakFade(Strategy):
         Uses YESTERDAY's streak values from lookback.
         """
         # Disabled per analysis: 25% win rate and causes major drawdowns
+        if diagnostics is not None: diagnostics["reason_skipped"] = "strategy_disabled"
         return None
 
         daily = indicators.get("daily", {})
@@ -70,7 +72,11 @@ class StreakFade(Strategy):
 
         current_price = indicators.get("current_price", 0)
         if current_price <= 0:
+            if diagnostics is not None: diagnostics["reason_skipped"] = "invalid_price"
             return None
+
+        if diagnostics is not None:
+            diagnostics["base_condition_met"] = (bull_streak >= min_streak or bear_streak >= min_streak)
 
         stop_mult = self.params["atr_stop_multiplier"]
         target_mult = self.params["atr_target_multiplier"]
@@ -79,6 +85,7 @@ class StreakFade(Strategy):
             # For bull streak SHORT, check trend alignment
             if ema_9 is not None and ema_21 is not None:
                 if ema_9 > ema_21:
+                    if diagnostics is not None: diagnostics["reason_skipped"] = "trend_alignment_wrong"
                     return None
 
             # Fade the bull streak -> SHORT
@@ -93,6 +100,7 @@ class StreakFade(Strategy):
             risk = stop_loss - entry_price
             reward = entry_price - target
             if risk <= 0 or (reward / risk) < 1.2:
+                if diagnostics is not None: diagnostics["reason_skipped"] = "poor_rr"
                 return None
 
             confidence = 0.8 if bull_streak >= 5 else 0.7
@@ -120,6 +128,7 @@ class StreakFade(Strategy):
             # For bear streak LONG, check trend alignment
             if ema_9 is not None and ema_21 is not None:
                 if ema_9 < ema_21:
+                    if diagnostics is not None: diagnostics["reason_skipped"] = "trend_alignment_wrong"
                     return None
 
             # Fade the bear streak -> LONG
@@ -133,6 +142,7 @@ class StreakFade(Strategy):
             risk = entry_price - stop_loss
             reward = target - entry_price
             if risk <= 0 or (reward / risk) < 1.2:
+                if diagnostics is not None: diagnostics["reason_skipped"] = "poor_rr"
                 return None
 
             confidence = 0.55  # Lower edge for bear streak bounce
@@ -156,6 +166,7 @@ class StreakFade(Strategy):
                 },
             )
 
+        if diagnostics is not None: diagnostics["reason_skipped"] = f"no_{min_streak}day_streak"
         return None
 
     def check_exit(

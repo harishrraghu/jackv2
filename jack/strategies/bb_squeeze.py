@@ -43,6 +43,7 @@ class BBSqueezeBreakout(Strategy):
         indicators: dict,
         current_time: str,
         filters: dict,
+        diagnostics: dict = None,
     ) -> Optional[TradeSignal]:
         """
         Check entry for BB squeeze breakout.
@@ -60,15 +61,22 @@ class BBSqueezeBreakout(Strategy):
 
         if (bb_width is None or bb_upper is None or
                 bb_lower is None or current_price <= 0):
+            if diagnostics is not None: diagnostics["reason_skipped"] = "missing_data"
             return None
 
         # Check if in squeeze
         bb_width_history = intraday_15m.get("BB_Width_history", [])
         if len(bb_width_history) < 5:
+            if diagnostics is not None: diagnostics["reason_skipped"] = "insufficient_history"
             return None
 
         threshold = np.percentile(bb_width_history, self.params["squeeze_threshold_pct"])
-        if bb_width > threshold:
+        
+        is_squeeze = bb_width <= threshold
+        if diagnostics is not None: diagnostics["base_condition_met"] = is_squeeze
+        
+        if not is_squeeze:
+            if diagnostics is not None: diagnostics["reason_skipped"] = f"no_squeeze_detected_bb_width_pctile>{self.params['squeeze_threshold_pct']}"
             return None  # Not in squeeze
 
         atr = indicators.get("daily", {}).get("ATR", 100)
@@ -97,7 +105,12 @@ class BBSqueezeBreakout(Strategy):
             confidence = 0.55
 
         else:
+            if diagnostics is not None: diagnostics["reason_skipped"] = "no_breakout"
             return None  # No breakout
+
+        if diagnostics is not None:
+            diagnostics["signal_generated"] = True
+            diagnostics["reason_skipped"] = None
 
         return TradeSignal(
             strategy_name=self.name,

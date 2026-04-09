@@ -2,11 +2,16 @@
 Walk-forward validation.
 
 Rolling walk-forward optimization that tests strategy robustness
-across multiple train/test windows.
+across multiple train/test windows by running actual simulations.
 """
 
+import os
+import copy
+import tempfile
+
 import pandas as pd
-from collections import defaultdict
+import numpy as np
+import yaml
 
 
 class WalkForwardValidator:
@@ -14,13 +19,26 @@ class WalkForwardValidator:
     Rolling walk-forward validation.
 
     Tests whether strategies that perform well in training also
-    perform well in subsequent out-of-sample periods.
+    perform well in subsequent out-of-sample periods by running
+    full simulations per window.
     """
 
-    def __init__(self, data: dict, strategies: list, config: dict):
-        self.data = data
-        self.strategies = strategies
+    def __init__(self, config: dict, config_path: str):
+        """
+        Initialize walk-forward validator.
+
+        Args:
+            config: Full config dict (from settings.yaml).
+            config_path: Path to the original config file (for Simulator).
+        """
         self.config = config
+        self.config_path = config_path
+
+        # Resolve base_dir from config_path for data loading
+        if os.path.isabs(config_path):
+            self.base_dir = os.path.dirname(os.path.dirname(config_path))
+        else:
+            self.base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     def generate_windows(self, train_years: int = 2,
                          test_months: int = 3) -> list[dict]:
@@ -34,7 +52,12 @@ class WalkForwardValidator:
         Returns:
             List of window dicts with train/test date ranges.
         """
-        daily = self.data.get("1d", pd.DataFrame())
+        # Load daily data to find date range
+        from data.loader import load_all_timeframes
+        data_path = os.path.join(self.base_dir, self.config["data"]["base_path"])
+        data = load_all_timeframes(data_path)
+        daily = data.get("1d", pd.DataFrame())
+
         if daily.empty:
             return []
 
@@ -67,70 +90,104 @@ class WalkForwardValidator:
 
     def run(self, train_years: int = 2, test_months: int = 3) -> dict:
         """
-        Run walk-forward validation.
+        Run walk-forward validation with actual simulation per window.
 
         Returns:
-            Dict with window results and strategy survival rates.
+            Dict with window results, survival rate, and degradation ratio.
         """
+        from engine.simulator import Simulator
+
         windows = self.generate_windows(train_years, test_months)
 
         if not windows:
-            return {"error": "insufficient_data_for_walk_forward", "windows": []}
+            return {"error": "insufficient_data", "windows": []}
 
         results = []
-        strategy_stats = defaultdict(lambda: {
-            "windows_tested": 0,
-            "profitable_train": 0,
-            "profitable_test": 0,
-            "profitable_both": 0,
-            "degradation_ratios": [],
-        })
 
-        for window in windows:
-            window_result = {
-                "train_start": window["train_start"],
-                "train_end": window["train_end"],
-                "test_start": window["test_start"],
-                "test_end": window["test_end"],
-                "strategies": {},
-            }
+        for i, window in enumerate(windows):
+            print(f"  Window {i+1}/{len(windows)}: "
+                  f"Train {window['train_start']}→{window['train_end']} | "
+                  f"Test {window['test_start']}→{window['test_end']}")
 
-            # Note: Full simulation per window would be expensive.
-            # For now, we mark this as a placeholder that the simulator
-            # would fill in during actual walk-forward runs.
-            for strat in self.strategies:
-                name = strat if isinstance(strat, str) else strat.name
-                strategy_stats[name]["windows_tested"] += 1
+            # Create a temporary config with this window's dates
+            temp_config = copy.deepcopy(self.config)
+            temp_config["splits"]["train"]["start"] = window["train_start"]
+            temp_config["splits"]["train"]["end"] = window["train_end"]
+            temp_config["splits"]["test"]["start"] = window["test_start"]
+            temp_config["splits"]["test"]["end"] = window["test_end"]
 
-                window_result["strategies"][name] = {
-                    "train_sharpe": None,
-                    "test_sharpe": None,
-                    "profitable_both": None,
-                    "note": "Run simulator per window for actual results",
+            # Write temp config
+            temp_dir = tempfile.mkdtemp()
+            temp_path = os.path.join(temp_dir, "settings.yaml")
+            with open(temp_path, "w") as f:
+                yaml.dump(temp_config, f)
+
+            try:
+                # Run train simulation
+                sim = Simulator(config_path=temp_path)
+                train_results = sim.run(split="train", verbose=False)
+
+                # Run test simulation
+                sim2 = Simulator(config_path=temp_path)
+                test_results = sim2.run(split="test", verbose=False)
+
+                train_sharpe = train_results.get("sharpe_ratio", 0)
+                test_sharpe = test_results.get("sharpe_ratio", 0)
+
+                window_result = {
+                    **window,
+                    "train_trades": train_results.get("total_trades", 0),
+                    "train_win_rate": train_results.get("win_rate", 0),
+                    "train_pnl": train_results.get("net_pnl", 0),
+                    "train_sharpe": train_sharpe,
+                    "test_trades": test_results.get("total_trades", 0),
+                    "test_win_rate": test_results.get("win_rate", 0),
+                    "test_pnl": test_results.get("net_pnl", 0),
+                    "test_sharpe": test_sharpe,
+                    "degradation_ratio": (
+                        test_sharpe / train_sharpe
+                        if train_sharpe > 0 else 0
+                    ),
                 }
+            except Exception as e:
+                print(f"    [ERROR] Window {i+1} failed: {e}")
+                window_result = {
+                    **window,
+                    "train_trades": 0, "train_win_rate": 0,
+                    "train_pnl": 0, "train_sharpe": 0,
+                    "test_trades": 0, "test_win_rate": 0,
+                    "test_pnl": 0, "test_sharpe": 0,
+                    "degradation_ratio": 0,
+                    "error": str(e),
+                }
+            finally:
+                # Clean up temp files
+                try:
+                    os.remove(temp_path)
+                    os.rmdir(temp_dir)
+                except OSError:
+                    pass
 
             results.append(window_result)
 
-        # Build summary
-        strategy_summary = {}
-        for name, stats in strategy_stats.items():
-            tested = stats["windows_tested"]
-            both = stats["profitable_both"]
-            survival = both / tested if tested > 0 else 0
-            avg_deg = (sum(stats["degradation_ratios"]) / len(stats["degradation_ratios"])
-                       if stats["degradation_ratios"] else 0)
-
-            strategy_summary[name] = {
-                "windows_tested": tested,
-                "survival_rate": round(survival, 3),
-                "avg_degradation": round(avg_deg, 3),
-                "robust": survival > 0.6 and avg_deg > 0.5,
-            }
+        # Compute survival rate
+        valid_results = [r for r in results if "error" not in r]
+        profitable_both = sum(
+            1 for r in valid_results
+            if r["train_pnl"] > 0 and r["test_pnl"] > 0
+        )
+        survival_rate = profitable_both / len(valid_results) if valid_results else 0
+        avg_degradation = (
+            np.mean([r["degradation_ratio"] for r in valid_results])
+            if valid_results else 0
+        )
 
         return {
             "windows": results,
-            "strategy_summary": strategy_summary,
-            "total_windows": len(windows),
+            "total_windows": len(results),
+            "survival_rate": round(survival_rate, 3),
+            "avg_degradation_ratio": round(float(avg_degradation), 3),
+            "robust": survival_rate > 0.6 and float(avg_degradation) > 0.5,
         }
 
     def print_report(self) -> None:
@@ -143,16 +200,30 @@ class WalkForwardValidator:
         print(f"\n  Total windows: {result['total_windows']}")
 
         if result.get("windows"):
-            print(f"\n  Windows:")
-            for i, w in enumerate(result["windows"][:10]):  # Show first 10
-                print(f"    {i+1}. Train: {w['train_start']} → {w['train_end']} | "
-                      f"Test: {w['test_start']} → {w['test_end']}")
+            print(f"\n  {'Window':<8} {'Train Period':<27} {'Test Period':<27} "
+                  f"{'Train PnL':>12} {'Test PnL':>12} {'Deg Ratio':>10}")
+            print(f"  {'-'*8} {'-'*27} {'-'*27} {'-'*12} {'-'*12} {'-'*10}")
 
-        if result.get("strategy_summary"):
-            print(f"\n  Strategy Survival:")
-            for name, stats in result["strategy_summary"].items():
-                robust_str = "✓ ROBUST" if stats["robust"] else "✗ FRAGILE"
-                print(f"    {name:25s}: survival={stats['survival_rate']:.0%} "
-                      f"degradation={stats['avg_degradation']:.2f} — {robust_str}")
+            for i, w in enumerate(result["windows"]):
+                train_period = f"{w['train_start']} → {w['train_end']}"
+                test_period = f"{w['test_start']} → {w['test_end']}"
+                train_pnl = w.get("train_pnl", 0)
+                test_pnl = w.get("test_pnl", 0)
+                deg = w.get("degradation_ratio", 0)
 
-        print(f"\n{'='*60}")
+                pnl_indicator = "✓" if test_pnl > 0 else "✗"
+                print(f"  {i+1:<8} {train_period:<27} {test_period:<27} "
+                      f"₹{train_pnl:>+10,.0f} ₹{test_pnl:>+10,.0f} "
+                      f"{deg:>8.2f}  {pnl_indicator}")
+
+        print(f"\n  Survival Rate: {result.get('survival_rate', 0):.1%} "
+              f"(profitable in both train & test)")
+        print(f"  Avg Degradation Ratio: {result.get('avg_degradation_ratio', 0):.3f}")
+
+        robust = result.get("robust", False)
+        if robust:
+            print(f"\n  ✓ SYSTEM IS ROBUST (survival > 60%, degradation > 0.5)")
+        else:
+            print(f"\n  ✗ SYSTEM MAY BE FRAGILE (needs more analysis)")
+
+        print(f"{'='*60}")

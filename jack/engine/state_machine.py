@@ -67,7 +67,7 @@ class StateMachine:
                 start="09:30",
                 end="10:15",
                 allowed_actions=["enter", "exit", "manage"],
-                eligible_strategies=["gap_fill", "gap_up_fade", "streak_fade"],
+                eligible_strategies=["gap_fill", "gap_up_fade", "streak_fade", "theta_harvest"],
             ),
             TradingPhase(
                 name="first_hour_execution",
@@ -81,14 +81,14 @@ class StateMachine:
                 start="11:15",
                 end="13:15",
                 allowed_actions=["exit", "manage", "enter"],
-                eligible_strategies=["bb_squeeze"],
+                eligible_strategies=["bb_squeeze", "vwap_reversion"],
             ),
             TradingPhase(
                 name="afternoon_push",
                 start="13:15",
                 end="15:00",
                 allowed_actions=["enter", "exit", "manage"],
-                eligible_strategies=["first_hour_verdict", "bb_squeeze"],
+                eligible_strategies=["first_hour_verdict", "bb_squeeze", "vwap_reversion"],
             ),
             TradingPhase(
                 name="closing",

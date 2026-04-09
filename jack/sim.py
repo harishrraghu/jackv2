@@ -11,6 +11,7 @@ Usage:
     python sim.py validate-data
     python sim.py indicators
     python sim.py strategies
+    python sim.py review [--days 5]
 """
 
 import argparse
@@ -133,7 +134,6 @@ def cmd_montecarlo(args):
 def cmd_walkforward(args):
     """Run walk-forward validation."""
     from analysis.walk_forward import WalkForwardValidator
-    from data.loader import load_all_timeframes
     import yaml
 
     config_path = args.config
@@ -143,17 +143,7 @@ def cmd_walkforward(args):
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
 
-    data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                             config["data"]["base_path"])
-    print("Loading data...")
-    data = load_all_timeframes(data_path)
-
-    strategy_names = [
-        "first_hour_verdict", "gap_fill", "streak_fade",
-        "bb_squeeze", "gap_up_fade",
-    ]
-
-    wf = WalkForwardValidator(data, strategy_names, config)
+    wf = WalkForwardValidator(config, config_path)
     wf.print_report()
 
 
@@ -252,6 +242,16 @@ def cmd_validate_data(args):
     validate_data(data)
 
 
+def cmd_review(args):
+    """Weekly journal review."""
+    from analysis.journal_analyzer import JournalAnalyzer
+    journal_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "journal", "logs")
+    analyzer = JournalAnalyzer(journal_dir=journal_dir)
+    print(f"{Colors.BOLD}Analyzing last {args.days} days...{Colors.RESET}\n")
+    memo = analyzer.generate_weekly_memo(n_days=args.days)
+    print(json.dumps(memo, indent=2))
+
+
 def cmd_indicators(args):
     """List all registered indicators."""
     from indicators.registry import IndicatorRegistry
@@ -286,13 +286,42 @@ def cmd_strategies(args):
     print(f"\n{Colors.BOLD}Strategies: {len(strategies)}{Colors.RESET}\n")
 
     for s in strategies:
-        tunable = [k for k, v in s.params.items() if isinstance(v, (int, float))]
+        tunable = [k for k, v in s.params.items() if isinstance(v, (int, float)) and not isinstance(v, bool)]
         print(f"  {Colors.GREEN}{s.name:25s}{Colors.RESET} "
               f"| params: {len(tunable)}/5 budget | "
               f"indicators: {', '.join(s.required_indicators)}")
         for k, v in s.params.items():
             print(f"    {k}: {v}")
         print()
+
+
+def cmd_diagnostics(args):
+    """Print the strategy diagnostics log."""
+    journal_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "journal", "logs")
+    diag_path = os.path.join(journal_dir, "diagnostics_summary.json")
+    if not os.path.exists(diag_path):
+        print(f"{Colors.RED}No diagnostics found. Run simulation first.{Colors.RESET}")
+        return
+        
+    with open(diag_path, "r") as f:
+        diag = json.load(f)
+        
+    print(f"\n{Colors.BOLD}--- STRATEGY DIAGNOSTICS ---{Colors.RESET}")
+    print(f"Total simulated days: {diag.get('total_days')}\n")
+    
+    for s_name, data in diag.get("per_strategy_summary", {}).items():
+        print(f"{Colors.GREEN}{Colors.BOLD}Strategy: {s_name}{Colors.RESET}")
+        print(f"  Days Eligible:      {data.get('days_eligible')}")
+        print(f"  Base Condition Met: {data.get('base_condition_met')}")
+        print(f"  Signal Generated:   {data.get('signal_generated')}")
+        print(f"  Passed Filters:     {data.get('passed_filters')}")
+        print(f"  Passed Scorer:      {data.get('passed_scorer')}")
+        print(f"  {Colors.YELLOW}Reason Histogram:{Colors.RESET}")
+        
+        hist = data.get("reason_histogram", {})
+        for reason, count in sorted(hist.items(), key=lambda x: x[1], reverse=True):
+            print(f"    - {reason}: {count}")
+        print("")
 
 
 def main():
@@ -343,6 +372,14 @@ def main():
     # strategies
     subparsers.add_parser("strategies", help="List strategies")
 
+    # review
+    p_review = subparsers.add_parser("review", help="Weekly journal review")
+    p_review.add_argument("--days", type=int, default=5)
+
+    # diagnostics
+    p_diag = subparsers.add_parser("diagnostics", help="Print the strategy diagnostics log")
+    p_diag.add_argument("--split", choices=["train", "test", "holdout"], default="train")
+
     args = parser.parse_args()
 
     if args.command is None:
@@ -359,6 +396,8 @@ def main():
         "validate-data": cmd_validate_data,
         "indicators": cmd_indicators,
         "strategies": cmd_strategies,
+        "diagnostics": cmd_diagnostics,
+        "review": cmd_review,
     }
 
     cmd_func = commands.get(args.command)
