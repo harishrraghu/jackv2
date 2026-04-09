@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+eggs/
+*.whl
+
+# Virtual environments
+venv/
+env/
+.venv/
+.env/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+
+# OS files
+Thumbs.db
+Desktop.ini
+.DS_Store
+.DS_Store?
+
+# Testing / Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Raw data (large CSV files)
+jack/data/raw/*.csv
+
+# Generated outputs
+jack/journal/logs/
+jack/report.html
+jack/journal/logs/*.json
+
+# Claude / AI tooling
+.claire/
+.claude/
+
+# Misc
+*.log
+*.bak
+*.tmp
+node_modules/
+
+data/

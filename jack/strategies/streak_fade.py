@@ -1,0 +1,212 @@
+"""
+Strategy C: Streak Fade.
+
+After 3 consecutive green days, next day is red 75%.
+After 3 red days, bounce 55%. Mean-reversion strategy.
+
+Parameters (3 of 5 budget):
+    min_streak: 3
+    atr_stop_multiplier: 0.8
+    target_to_sma20: True
+"""
+
+from typing import Optional
+
+from strategies.base import Strategy, TradeSignal, ExitSignal
+
+
+class StreakFade(Strategy):
+    """Fade extended consecutive day streaks."""
+
+    def __init__(self, params: dict = None):
+        default_params = {
+            "min_streak": 3,
+            "atr_stop_multiplier": 0.8,
+            "target_to_sma20": True,
+        }
+        if params:
+            default_params.update(params)
+
+        super().__init__(name="streak_fade", params=default_params)
+        self.required_indicators = ["streaks", "sma", "atr"]
+        self.eligible_timeframes = ["09:15-09:30"]
+
+    def check_entry(
+        self,
+        day_data: dict,
+        lookback: dict,
+        indicators: dict,
+        current_time: str,
+        filters: dict,
+    ) -> Optional[TradeSignal]:
+        """
+        Check entry for streak fade.
+
+        Uses YESTERDAY's streak values from lookback.
+        """
+        daily = indicators.get("daily", {})
+        lookback_daily = indicators.get("lookback_daily", {})
+
+        bull_streak = lookback_daily.get("Bull_Streak", 0)
+        bear_streak = lookback_daily.get("Bear_Streak", 0)
+
+        min_streak = self.params["min_streak"]
+        atr = daily.get("ATR", 0)
+        sma_20 = daily.get("SMA_20", 0)
+
+        if atr is None or atr <= 0:
+            return None
+
+        current_price = indicators.get("current_price", 0)
+        if current_price <= 0:
+            return None
+
+        stop_mult = self.params["atr_stop_multiplier"]
+
+        if bull_streak >= min_streak:
+            # Fade the bull streak -> SHORT
+            entry_price = current_price  # Enter at open
+            # Stop above highest high of the streak
+            streak_high = lookback_daily.get("streak_high", entry_price + atr)
+            stop_loss = streak_high + stop_mult * atr
+
+            # Target: SMA_20 if it's BELOW current price (valid for short)
+            # Otherwise use ATR-based target
+            if sma_20 > 0 and sma_20 < entry_price:
+                target = sma_20
+            else:
+                target = entry_price - atr  # 1 ATR below entry
+
+            confidence = 0.8 if bull_streak >= 4 else 0.7
+
+            return TradeSignal(
+                strategy_name=self.name,
+                direction="SHORT",
+                entry_price=entry_price,
+                stop_loss=stop_loss,
+                target=target,
+                confidence=confidence,
+                reason=(
+                    f"Streak fade: {bull_streak} consecutive green days. "
+                    f"Target: {target:.0f}"
+                ),
+                metadata={
+                    "streak_length": bull_streak,
+                    "streak_type": "bull",
+                    "sma_20": sma_20,
+                    "entry_day": 1,
+                    "max_hold_days": 2,
+                },
+            )
+
+        elif bear_streak >= min_streak:
+            # Fade the bear streak -> LONG
+            entry_price = current_price
+            streak_low = lookback_daily.get("streak_low", entry_price - atr)
+            stop_loss = streak_low - stop_mult * atr
+
+            # Target: SMA_20 if it's ABOVE current price (valid for long)
+            # Otherwise use ATR-based target
+            if sma_20 > 0 and sma_20 > entry_price:
+                target = sma_20
+            else:
+                target = entry_price + atr  # 1 ATR above entry
+
+            confidence = 0.55  # Lower edge for bear streak bounce
+
+            return TradeSignal(
+                strategy_name=self.name,
+                direction="LONG",
+                entry_price=entry_price,
+                stop_loss=stop_loss,
+                target=target,
+                confidence=confidence,
+                reason=(
+                    f"Streak fade: {bear_streak} consecutive red days. "
+                    f"Target: {target:.0f}"
+                ),
+                metadata={
+                    "streak_length": bear_streak,
+                    "streak_type": "bear",
+                    "sma_20": sma_20,
+                    "entry_day": 1,
+                    "max_hold_days": 2,
+                },
+            )
+
+        return None
+
+    def check_exit(
+        self,
+        position: dict,
+        day_data: dict,
+        current_time: str,
+        current_price: float,
+    ) -> ExitSignal:
+        """
+        Check exit for streak fade positions.
+
+        This strategy can hold overnight — max 2 trading days.
+        """
+        direction = position.get("direction", "LONG")
+        stop_loss = position.get("stop_loss", 0)
+        target = position.get("target", 0)
+        entry_day = position.get("metadata", {}).get("entry_day", 1)
+        max_hold = position.get("metadata", {}).get("max_hold_days", 2)
+
+        # Max hold period
+        if entry_day > max_hold and current_time >= "15:15":
+            return ExitSignal(
+                should_exit=True,
+                exit_price=current_price,
+                reason="time_exit",
+            )
+
+        if direction == "LONG":
+            if current_price <= stop_loss:
+                return ExitSignal(
+                    should_exit=True,
+                    exit_price=stop_loss,
+                    reason="stop_hit",
+                )
+            if current_price >= target:
+                return ExitSignal(
+                    should_exit=True,
+                    exit_price=target,
+                    reason="target_hit",
+                )
+        else:  # SHORT
+            if current_price >= stop_loss:
+                return ExitSignal(
+                    should_exit=True,
+                    exit_price=stop_loss,
+                    reason="stop_hit",
+                )
+            if current_price <= target:
+                return ExitSignal(
+                    should_exit=True,
+                    exit_price=target,
+                    reason="target_hit",
+                )
+
+        return ExitSignal(should_exit=False, exit_price=current_price, reason="hold")
+
+    def score(self, signal: TradeSignal, filters: dict) -> float:
+        """
+        Score streak fade signal.
+
+        4+ day streak: *1.2
+        Fading strong trend: *0.6
+        """
+        score = signal.confidence
+
+        streak_len = signal.metadata.get("streak_length", 3)
+        if streak_len >= 4:
+            score *= 1.2
+
+        regime = filters.get("regime", "normal")
+        if regime == "trending_strong":
+            # Don't fade strong trends
+            score *= 0.6
+
+        return min(score, 2.0)
