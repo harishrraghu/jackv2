@@ -80,30 +80,39 @@ def _compress_log(log: dict) -> dict:
             "strategy": t.get("strategy"),
             "direction": t.get("direction"),
             "entry_time": t.get("entry_time"),
+            "entry_price": t.get("entry_price"),
             "exit_time": t.get("exit_time"),
+            "exit_price": t.get("exit_price"),
+            "stop_loss": t.get("stop_loss"),
+            "target": t.get("target"),
             "net_pnl": t.get("net_pnl"),
             "exit_reason": t.get("exit_reason"),
             "r_multiple": t.get("r_multiple"),
+            "post_mortem": t.get("post_mortem", {}),
         })
 
     scan = log.get("morning_scan", {})
+    pre_market = log.get("pre_market", {})
+    pre_market_gap = pre_market.get("gap", {})
     fh = log.get("first_hour", {})
     review = log.get("daily_review", {})
     briefing = log.get("briefing", {})
     filters = briefing.get("filters", {})
     global_ctx = briefing.get("global", {})
+    m5 = log.get("5m_indicators", {})
 
     return {
         "date": log.get("date") or log.get("_file_date"),
         "day_of_week": log.get("day_of_week"),
-        "gap_pct": scan.get("gap_pct"),
-        "gap_type": scan.get("gap_type"),
-        "regime": scan.get("regime"),
-        "atr": scan.get("atr"),
-        "rsi": scan.get("rsi"),
+        "gap_pct": pre_market_gap.get("Gap_Pct"),
+        "gap_type": pre_market_gap.get("Gap_Type"),
+        "regime": pre_market.get("regime"),
+        "atr": pre_market.get("atr"),
+        "rsi": pre_market.get("rsi"),
         "fh_return_pct": fh.get("FH_Return"),
         "fh_direction": fh.get("FH_Direction"),
         "fh_strong": fh.get("FH_Strong"),
+        "5m_indicators": m5,
         "trades": compressed_trades,
         "total_pnl": review.get("total_pnl"),
         "no_trade_reason": review.get("no_trade_reason"),

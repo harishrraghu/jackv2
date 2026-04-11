@@ -35,6 +35,7 @@ from strategies.bb_squeeze import BBSqueezeBreakout
 from strategies.gap_up_fade import GapUpFade
 from strategies.vwap_reversion import VWAPReversion
 from strategies.theta_harvest import ThetaHarvest
+from strategies.afternoon_breakout import AfternoonBreakout
 
 # Import single-day indicator functions
 from indicators.orb import compute_single_day as orb_single_day
@@ -95,6 +96,7 @@ class Simulator:
             "gap_up_fade": GapUpFade(),
             "vwap_reversion": VWAPReversion(),
             "theta_harvest": ThetaHarvest(),
+            "afternoon_breakout": AfternoonBreakout(),
         }
 
         # Load AI retrospective insight weights (if any saved insights exist)

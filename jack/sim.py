@@ -43,7 +43,7 @@ def cmd_run(args):
     print(f"\n{Colors.BOLD}{'='*60}")
     print(f"  SIMULATION COMPLETE — {args.split.upper()} SPLIT")
     print(f"{'='*60}{Colors.RESET}")
-    print(f"  Period: {results.get('start_date')} → {results.get('end_date')}")
+    print(f"  Period: {results.get('start_date')} -> {results.get('end_date')}")
     print(f"  Trading days: {results.get('total_days', 0)}")
     print(f"  Total trades: {results.get('total_trades', 0)}")
 
@@ -53,7 +53,7 @@ def cmd_run(args):
 
     pnl = results.get('net_pnl', 0)
     pnl_color = Colors.GREEN if pnl > 0 else Colors.RED
-    print(f"  Net P&L: {pnl_color}₹{pnl:,.2f}{Colors.RESET}")
+    print(f"  Net P&L: {pnl_color}Rs. {pnl:,.2f}{Colors.RESET}")
 
     ret = results.get('return_pct', 0)
     ret_color = Colors.GREEN if ret > 0 else Colors.RED
@@ -69,7 +69,7 @@ def cmd_run(args):
             c = Colors.GREEN if p > 0 else Colors.RED
             print(f"    {s:25s}: {data.get('trades', 0):3d} trades | "
                   f"WR: {data.get('win_rate', 0):5.1f}% | "
-                  f"P&L: {c}₹{p:+,.0f}{Colors.RESET}")
+                  f"P&L: {c}Rs. {p:+,.0f}{Colors.RESET}")
 
     # Save results
     results_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -277,10 +277,13 @@ def cmd_strategies(args):
     from strategies.streak_fade import StreakFade
     from strategies.bb_squeeze import BBSqueezeBreakout
     from strategies.gap_up_fade import GapUpFade
+    from strategies.vwap_reversion import VWAPReversion
+    from strategies.afternoon_breakout import AfternoonBreakout
 
     strategies = [
         FirstHourVerdict(), GapFill(), StreakFade(),
-        BBSqueezeBreakout(), GapUpFade(),
+        BBSqueezeBreakout(), GapUpFade(), VWAPReversion(),
+        AfternoonBreakout(),
     ]
 
     print(f"\n{Colors.BOLD}Strategies: {len(strategies)}{Colors.RESET}\n")

@@ -88,7 +88,7 @@ class StateMachine:
                 start="13:15",
                 end="15:00",
                 allowed_actions=["enter", "exit", "manage"],
-                eligible_strategies=["first_hour_verdict", "bb_squeeze", "vwap_reversion"],
+                eligible_strategies=["first_hour_verdict", "bb_squeeze", "vwap_reversion", "afternoon_breakout"],
             ),
             TradingPhase(
                 name="closing",

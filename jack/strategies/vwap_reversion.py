@@ -13,11 +13,11 @@ class VWAPReversion(Strategy):
 
     def __init__(self, params: dict = None):
         default_params = {
-            "vwap_dev_pct": 0.3,
-            "rsi_extreme_short": 70,
-            "rsi_extreme_long": 30,
-            "adx_threshold": 25,
-            "max_dev_stop_pct": 0.5,
+            "vwap_dev_pct": 0.15,
+            "rsi_extreme_short": 58,
+            "rsi_extreme_long": 42,
+            "adx_threshold": 30,
+            "max_dev_stop_pct": 0.15,
         }
         if params:
             default_params.update(params)
