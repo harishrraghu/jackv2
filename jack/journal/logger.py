@@ -35,6 +35,10 @@ class JournalLogger:
         trade_events: list[dict],
         decision_log: list[dict],
         capital_state: dict,
+        missed_opportunities: list[dict] = None,
+        post_mortems: dict = None,
+        day_type: str = None,
+        cumulative_stats: dict = None,
     ) -> None:
         """
         Write a JSON file for each trading day.
@@ -45,33 +49,67 @@ class JournalLogger:
             trade_events: List of trade result dicts.
             decision_log: Scorer decision log.
             capital_state: Risk manager state.
+            missed_opportunities: List of missed/blocked trade hypotheticals.
+            post_mortems: Dict mapping trade index to post-mortem dict.
+            day_type: Classified type of day.
+            cumulative_stats: Running system statistics.
         """
         date_str = (date.strftime("%Y-%m-%d")
                     if hasattr(date, 'strftime') else str(date))
 
+        # Add post mortem to trades if provided
+        trades = self._format_trades(trade_events)
+        if post_mortems:
+            for i, trade in enumerate(trades):
+                if i in post_mortems:
+                    trade["post_mortem"] = post_mortems[i]
+
         log_entry = {
             "date": date_str,
             "day_of_week": briefing.get("day_of_week", ""),
-            "capital_start": briefing.get("capital", 0),
-            "capital_end": capital_state.get("current_capital", 0),
-            "morning_scan": {
-                "gap_type": briefing.get("gap", {}).get("Gap_Type", "flat"),
-                "gap_pct": briefing.get("gap", {}).get("Gap_Pct"),
+            "day_type": day_type or "unclassified",
+
+            "pre_market": {
+                "gap": briefing.get("gap", {}),
                 "regime": briefing.get("regime", "normal"),
                 "atr": briefing.get("daily_indicators", {}).get("ATR"),
-                "rsi_daily": briefing.get("daily_indicators", {}).get("RSI"),
-                "streak": briefing.get("streak", {}),
-                "filter_verdict": {
-                    "combined_long_mult": briefing.get("filters", {}).get(
-                        "combined_long_multiplier"),
-                    "combined_short_mult": briefing.get("filters", {}).get(
-                        "combined_short_multiplier"),
-                },
+                "rsi": briefing.get("daily_indicators", {}).get("RSI"),
             },
+
+            "morning_scan": {
+                "filter_verdict": {
+                    "combined_long": briefing.get("filters", {}).get("combined_long_multiplier"),
+                    "combined_short": briefing.get("filters", {}).get("combined_short_multiplier"),
+                    "blocked": briefing.get("filters", {}).get("trade_blocked", False),
+                },
+                "key_levels": {
+                    "vwap": briefing.get("vwap"),
+                    "pivot": briefing.get("daily_indicators", {}).get("PP"),
+                    "r1": briefing.get("daily_indicators", {}).get("R1"),
+                    "s1": briefing.get("daily_indicators", {}).get("S1"),
+                },
+                "streak": briefing.get("streak", {}),
+            },
+
             "first_hour": briefing.get("first_hour", {}),
+            "5m_indicators": briefing.get("5m_indicators", {}),
             "strategies_evaluated": decision_log,
-            "trades": self._format_trades(trade_events),
-            "drawdown": capital_state.get("drawdown", {}),
+            "missed_opportunities": missed_opportunities or [],
+            "trades": trades,
+
+            "daily_review": {
+                "day_type": day_type,
+                "total_pnl": sum(t.get("net_pnl", 0) for t in trade_events),
+                "trades_taken": len(trade_events),
+            },
+
+            "capital": {
+                "start": briefing.get("capital", 0),
+                "end": capital_state.get("current_capital", 0),
+                "drawdown": capital_state.get("drawdown", {}),
+            },
+
+            "cumulative_stats": cumulative_stats or {},
         }
 
         filepath = os.path.join(self.output_dir, f"{date_str}.json")
@@ -99,6 +137,7 @@ class JournalLogger:
                 "costs": trade.get("costs", {}).get("total_costs", 0),
                 "net_pnl": trade.get("net_pnl", 0),
                 "exit_reason": trade.get("exit_reason", ""),
+                "post_mortem": trade.get("post_mortem", {}),
             })
         return formatted
 

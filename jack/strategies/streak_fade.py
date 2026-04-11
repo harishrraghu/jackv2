@@ -5,9 +5,9 @@ After 3 consecutive green days, next day is red 75%.
 After 3 red days, bounce 55%. Mean-reversion strategy.
 
 Parameters (3 of 5 budget):
-    min_streak: 3
-    atr_stop_multiplier: 0.8
-    target_to_sma20: True
+    min_streak: 4
+    atr_stop_multiplier: 0.6
+    atr_target_multiplier: 1.5
 """
 
 from typing import Optional
@@ -20,15 +20,15 @@ class StreakFade(Strategy):
 
     def __init__(self, params: dict = None):
         default_params = {
-            "min_streak": 3,
-            "atr_stop_multiplier": 0.8,
-            "target_to_sma20": True,
+            "min_streak": 4,
+            "atr_stop_multiplier": 0.6,
+            "atr_target_multiplier": 1.5,
         }
         if params:
             default_params.update(params)
 
         super().__init__(name="streak_fade", params=default_params)
-        self.required_indicators = ["streaks", "sma", "atr"]
+        self.required_indicators = ["streaks", "sma", "atr", "adx", "ema"]
         self.eligible_timeframes = ["09:15-09:30"]
 
     def check_entry(
@@ -38,12 +38,17 @@ class StreakFade(Strategy):
         indicators: dict,
         current_time: str,
         filters: dict,
+        diagnostics: dict = None,
     ) -> Optional[TradeSignal]:
         """
         Check entry for streak fade.
 
         Uses YESTERDAY's streak values from lookback.
         """
+        # Disabled per analysis: 25% win rate and causes major drawdowns
+        if diagnostics is not None: diagnostics["reason_skipped"] = "strategy_disabled"
+        return None
+
         daily = indicators.get("daily", {})
         lookback_daily = indicators.get("lookback_daily", {})
 
@@ -52,32 +57,53 @@ class StreakFade(Strategy):
 
         min_streak = self.params["min_streak"]
         atr = daily.get("ATR", 0)
-        sma_20 = daily.get("SMA_20", 0)
+        # sma_20 = daily.get("SMA_20", 0)
+        
+        adx = daily.get("ADX")
+        ema_9 = daily.get("EMA_9")
+        ema_21 = daily.get("EMA_21")
 
         if atr is None or atr <= 0:
             return None
 
-        current_price = indicators.get("current_price", 0)
-        if current_price <= 0:
+        # Mean reversion only in ranging markets
+        if adx is not None and adx > 25:
             return None
 
+        current_price = indicators.get("current_price", 0)
+        if current_price <= 0:
+            if diagnostics is not None: diagnostics["reason_skipped"] = "invalid_price"
+            return None
+
+        if diagnostics is not None:
+            diagnostics["base_condition_met"] = (bull_streak >= min_streak or bear_streak >= min_streak)
+
         stop_mult = self.params["atr_stop_multiplier"]
+        target_mult = self.params["atr_target_multiplier"]
 
         if bull_streak >= min_streak:
+            # For bull streak SHORT, check trend alignment
+            if ema_9 is not None and ema_21 is not None:
+                if ema_9 > ema_21:
+                    if diagnostics is not None: diagnostics["reason_skipped"] = "trend_alignment_wrong"
+                    return None
+
             # Fade the bull streak -> SHORT
             entry_price = current_price  # Enter at open
             # Stop above highest high of the streak
             streak_high = lookback_daily.get("streak_high", entry_price + atr)
             stop_loss = streak_high + stop_mult * atr
+            
+            target = entry_price - atr * target_mult
 
-            # Target: SMA_20 if it's BELOW current price (valid for short)
-            # Otherwise use ATR-based target
-            if sma_20 > 0 and sma_20 < entry_price:
-                target = sma_20
-            else:
-                target = entry_price - atr  # 1 ATR below entry
+            # R:R check
+            risk = stop_loss - entry_price
+            reward = entry_price - target
+            if risk <= 0 or (reward / risk) < 1.2:
+                if diagnostics is not None: diagnostics["reason_skipped"] = "poor_rr"
+                return None
 
-            confidence = 0.8 if bull_streak >= 4 else 0.7
+            confidence = 0.8 if bull_streak >= 5 else 0.7
 
             return TradeSignal(
                 strategy_name=self.name,
@@ -93,24 +119,31 @@ class StreakFade(Strategy):
                 metadata={
                     "streak_length": bull_streak,
                     "streak_type": "bull",
-                    "sma_20": sma_20,
                     "entry_day": 1,
                     "max_hold_days": 2,
                 },
             )
 
         elif bear_streak >= min_streak:
+            # For bear streak LONG, check trend alignment
+            if ema_9 is not None and ema_21 is not None:
+                if ema_9 < ema_21:
+                    if diagnostics is not None: diagnostics["reason_skipped"] = "trend_alignment_wrong"
+                    return None
+
             # Fade the bear streak -> LONG
             entry_price = current_price
             streak_low = lookback_daily.get("streak_low", entry_price - atr)
             stop_loss = streak_low - stop_mult * atr
 
-            # Target: SMA_20 if it's ABOVE current price (valid for long)
-            # Otherwise use ATR-based target
-            if sma_20 > 0 and sma_20 > entry_price:
-                target = sma_20
-            else:
-                target = entry_price + atr  # 1 ATR above entry
+            target = entry_price + atr * target_mult
+
+            # R:R check
+            risk = entry_price - stop_loss
+            reward = target - entry_price
+            if risk <= 0 or (reward / risk) < 1.2:
+                if diagnostics is not None: diagnostics["reason_skipped"] = "poor_rr"
+                return None
 
             confidence = 0.55  # Lower edge for bear streak bounce
 
@@ -128,12 +161,12 @@ class StreakFade(Strategy):
                 metadata={
                     "streak_length": bear_streak,
                     "streak_type": "bear",
-                    "sma_20": sma_20,
                     "entry_day": 1,
                     "max_hold_days": 2,
                 },
             )
 
+        if diagnostics is not None: diagnostics["reason_skipped"] = f"no_{min_streak}day_streak"
         return None
 
     def check_exit(
@@ -196,17 +229,17 @@ class StreakFade(Strategy):
         Score streak fade signal.
 
         4+ day streak: *1.2
-        Fading strong trend: *0.6
+        Fading trends: *0.7
         """
         score = signal.confidence
 
         streak_len = signal.metadata.get("streak_length", 3)
-        if streak_len >= 4:
+        if streak_len >= 5: # Since min streak is 4 now
             score *= 1.2
 
         regime = filters.get("regime", "normal")
-        if regime == "trending_strong":
-            # Don't fade strong trends
-            score *= 0.6
+        if regime in ("trending_strong", "trending_weak"):
+            # Don't fade trends aggressively
+            score *= 0.7
 
         return min(score, 2.0)

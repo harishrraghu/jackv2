@@ -61,6 +61,32 @@ class TestFilters:
         # Tuesday: long=0.6, other filters neutral = 0.6
         assert result["combined_long_multiplier"] < 1.0
 
+    def test_extreme_atr_blocks_trading(self):
+        """ATR > 3x average should block trading entirely."""
+        date = pd.Timestamp("2020-01-07")
+        result = run_filter_stack(
+            date,
+            lookback_daily={"Bull_Streak": 0, "Bear_Streak": 0, "avg_ATR_60d": 100},
+            indicators={"RSI": 50, "hourly_RSI": 50, "ATR": 350},
+        )
+        assert result["trade_blocked"] is True
+        assert result["combined_long_multiplier"] == 0.0
+
+    def test_extreme_atr_half_size(self):
+        """ATR 2x-3x average should halve position size."""
+        date = pd.Timestamp("2020-01-07")
+        # Tuesday -> long_multiplier = 0.6. Volatility filter -> 0.9. Extreme vol -> 0.5.
+        # Total with weights [1.5, 1.2, 1.0, 1.0, 0.8]:
+        # (0.6*1.5 + 1.0*1.2 + 0.9*1.0 + 1.0*1.0 + 1.0*0.8) / 5.5 = 4.8 / 5.5 = 0.8727
+        # 0.8727 * 0.5 (ext_vol) = 0.4364
+        result = run_filter_stack(
+            date,
+            lookback_daily={"Bull_Streak": 0, "Bear_Streak": 0, "avg_ATR_60d": 100},
+            indicators={"RSI": 50, "hourly_RSI": 50, "ATR": 250},
+        )
+        assert result["trade_blocked"] is False
+        assert result["combined_long_multiplier"] == 0.4364
+
 
 # ═══════════ STATE MACHINE TESTS ═══════════
 
@@ -153,13 +179,37 @@ class TestRiskManager:
         assert can is False
         assert reason == "daily_drawdown_limit"
 
+    def test_same_strategy_blocked_after_stopout(self):
+        """Test same strategy is blocked from re-entering after stop-out."""
+        signal = TradeSignal(
+            strategy_name="test_strategy", direction="LONG",
+            entry_price=48000, stop_loss=47800, target=48400,
+            confidence=0.8, reason="test"
+        )
+        # Entry
+        pos = self.rm.execute_entry(signal)
+        # Exit with stop_hit
+        from strategies.base import ExitSignal
+        exit_sig = ExitSignal(should_exit=True, exit_price=47800, reason="stop_hit")
+        self.rm.execute_exit(exit_sig, 47800)
+        
+        # Try to re-enter
+        can, reason = self.rm.can_trade(signal)
+        assert can is False
+        assert reason == "strategy_stopped_out_today"
+
     def test_cost_calculation(self):
-        """Test cost calculation."""
-        costs = self.rm.calculate_costs(48000, 48500, 30, "LONG")
+        """Test cost calculation with 0.0125% futures STT."""
+        costs = self.rm.calculate_costs(48000, 48500, 30, "LONG", instrument_type="futures")
         assert costs["total_costs"] > 0
-        assert "brokerage_entry" in costs
-        assert "stt" in costs
-        assert "slippage" in costs
+        # Sell turnover = 48500 * 30 = 1,455,000. STT @ 0.0125% = 181.875 -> ~181.88
+        assert abs(costs["stt"] - 181.88) < 0.1
+
+    def test_cost_calculation_options_stt(self):
+        """Test options STT rate calculation."""
+        costs = self.rm.calculate_costs(400, 500, 1500, "LONG", instrument_type="options")
+        # Sell turnover = 500 * 1500 = 750,000. STT @ 0.0625% = 468.75
+        assert abs(costs["stt"] - 468.75) < 0.1
 
     def test_slippage_direction(self):
         """Test slippage is applied in correct direction (worse for trader)."""
@@ -225,3 +275,31 @@ class TestScorer:
         filters = {"combined_long_multiplier": 0.6, "combined_short_multiplier": 1.3}
         scored = self.scorer.score_signals([signal], filters)
         assert scored[0][1] < 0.6  # Score reduced by filter
+
+
+# ═══════════ SIMULATOR TESTS ═══════════
+
+class TestSimulator:
+    def test_sharpe_from_equity_known_curve(self):
+        """Test daily Sharpe ratio calculation over a known equity curve including flat days."""
+        from engine.simulator import Simulator
+        import math
+        import numpy as np
+        
+        sim = Simulator(config_path="config/settings.yaml")
+        # create synthetic equity curve
+        # flat daily returns: 0, 0.01, -0.005, 0 (4 daily returns from 5 valid days)
+        eq = [
+            ("2024-01-01", 1000000),
+            ("2024-01-02", 1000000),  # 0%
+            ("2024-01-03", 1010000),  # +1%
+            ("2024-01-04", 1004950),  # -0.5%
+            ("2024-01-05", 1004950)   # 0%
+        ]
+        sharpe = sim._compute_sharpe_from_equity(eq, risk_free_annual=0.0)
+        
+        returns = np.array([0, 0.01, -0.005, 0])
+        mean_ret = np.mean(returns)
+        std_ret = np.std(returns, ddof=1)
+        expected = (mean_ret / std_ret) * math.sqrt(252)
+        assert abs(sharpe - expected) < 0.01

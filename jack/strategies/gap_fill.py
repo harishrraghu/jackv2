@@ -40,6 +40,7 @@ class GapFill(Strategy):
         indicators: dict,
         current_time: str,
         filters: dict,
+        diagnostics: dict = None,
     ) -> Optional[TradeSignal]:
         """
         Check entry for gap fill.
@@ -52,18 +53,30 @@ class GapFill(Strategy):
         gap_type = gap.get("Gap_Type", "flat")
         gap_pct = gap.get("Gap_Pct", 0)
 
-        # Must be a small gap down
-        if gap_type != "small_down":
-            return None
-
         # Verify gap size is within range
         abs_gap = abs(gap_pct)
-        if abs_gap < self.params["min_gap_pct"] or abs_gap > self.params["max_gap_pct"]:
+        base_condition = self.params["min_gap_pct"] <= abs_gap <= self.params["max_gap_pct"]
+        if diagnostics is not None: diagnostics["base_condition_met"] = base_condition
+        
+        # Must be a small gap down
+        if gap_type != "small_down":
+            if diagnostics is not None: diagnostics["reason_skipped"] = f"gap_type={gap_type}_not_small_down"
+            return None
+
+        # Block entry in losing regimes identified by AI Retrospective
+        regime = filters.get("regime", "normal")
+        if regime in ["ranging", "squeeze", "trending_weak"]:
+            if diagnostics is not None: diagnostics["reason_skipped"] = "regime_filter_killed"
+            return None
+
+        if not base_condition:
+            if diagnostics is not None: diagnostics["reason_skipped"] = "gap_too_large_or_small"
             return None
 
         # First 15m candle must be bullish
         orb_bullish = orb.get("ORB_Bullish", False)
         if not orb_bullish:
+            if diagnostics is not None: diagnostics["reason_skipped"] = "orb_not_bullish"
             return None
 
         orb_low = orb.get("ORB_Low", 0)
@@ -77,9 +90,14 @@ class GapFill(Strategy):
         stop_loss = orb_low - self.params["stop_buffer_pts"]
         target = prev_close  # Gap fill level
 
-        # Not enough reward
-        if target - entry_price < 20:
+        # Not enough reward (increased from 20 to 40 to overcome fixed costs)
+        if target - entry_price < 40:
+            if diagnostics is not None: diagnostics["reason_skipped"] = "poor_reward"
             return None
+
+        if diagnostics is not None:
+            diagnostics["signal_generated"] = True
+            diagnostics["reason_skipped"] = None
 
         return TradeSignal(
             strategy_name=self.name,
@@ -97,6 +115,7 @@ class GapFill(Strategy):
                 "gap_type": gap_type,
                 "orb_low": orb_low,
                 "prev_close": prev_close,
+                "risk_multiplier": 0.5,  # scale down risk to reduce quantity/costs
             },
         )
 

@@ -91,26 +91,50 @@ class PerformanceAnalyzer:
         daily_returns = self._compute_daily_returns()
         risk_free_daily = 0.065 / 252
 
+        # sharpe_monthly (true Sharpe)
+        monthly_returns = self._compute_monthly_returns()
+        risk_free_monthly = 0.065 / 12
+        if len(monthly_returns) > 1:
+            mean_m_ret = np.mean(monthly_returns)
+            std_m_ret = np.std(monthly_returns, ddof=1)
+            sharpe_monthly = ((mean_m_ret - risk_free_monthly) / std_m_ret * math.sqrt(12)
+                              if std_m_ret > 0 else 0)
+                              
+            downside_m = [r for r in monthly_returns if r < risk_free_monthly]
+            dd_std_m = np.std(downside_m, ddof=1) if len(downside_m) > 1 else np.std(monthly_returns, ddof=1)
+            sortino_monthly = ((mean_m_ret - risk_free_monthly) / dd_std_m * math.sqrt(12)
+                               if dd_std_m > 0 else 0)
+        else:
+            sharpe_monthly = 0
+            sortino_monthly = 0
+
+        # sharpe_trade_days
+        daily_trade_returns = [r for r in daily_returns if r != 0]
+        if len(daily_trade_returns) > 1:
+            mean_trade = np.mean(daily_trade_returns)
+            std_trade = np.std(daily_trade_returns, ddof=1)
+            sharpe_trade_days = ((mean_trade - risk_free_daily) / std_trade * math.sqrt(252)
+                                 if std_trade > 0 else 0)
+        else:
+            sharpe_trade_days = 0
+
+        # sharpe_inflated_DO_NOT_USE
         if len(daily_returns) > 1:
             mean_ret = np.mean(daily_returns)
             std_ret = np.std(daily_returns, ddof=1)
-            sharpe = ((mean_ret - risk_free_daily) / std_ret * math.sqrt(252)
-                      if std_ret > 0 else 0)
-
-            # Sortino — downside deviation only
-            downside = [r for r in daily_returns if r < risk_free_daily]
-            dd_std = np.std(downside, ddof=1) if len(downside) > 1 else 1
-            sortino = ((mean_ret - risk_free_daily) / dd_std * math.sqrt(252)
-                       if dd_std > 0 else 0)
+            sharpe_inflated = ((mean_ret - risk_free_daily) / std_ret * math.sqrt(252)
+                               if std_ret > 0 else 0)
         else:
-            sharpe = 0
-            sortino = 0
+            sharpe_inflated = 0
 
         # Ulcer index
         ulcer = math.sqrt(np.mean(drawdowns_sq)) if drawdowns_sq else 0
 
         # Calmar
         calmar = ann_return / max_dd_pct if max_dd_pct > 0 else 0
+        
+        # Recovery Factor
+        recovery_factor = net_pnl / max_dd_abs if max_dd_abs > 0 else 0
 
         # Trade durations (placeholder — needs time parsing)
         avg_duration = 0
@@ -142,10 +166,14 @@ class PerformanceAnalyzer:
             "max_drawdown_abs": round(max_dd_abs, 2),
             "max_drawdown_duration_days": max_dd_duration,
             "calmar_ratio": round(calmar, 3),
+            "recovery_factor": round(recovery_factor, 3),
             "ulcer_index": round(ulcer, 3),
             # Risk-adjusted
-            "sharpe_ratio": round(sharpe, 3),
-            "sortino_ratio": round(sortino, 3),
+            "sharpe_monthly": round(sharpe_monthly, 3),
+            "sortino_monthly": round(sortino_monthly, 3),
+            "sharpe_trade_days": round(sharpe_trade_days, 3),
+            "sharpe_inflated_DO_NOT_USE": round(sharpe_inflated, 3),
+            "sharpe_ratio": round(sharpe_monthly, 3),  # Point to monthly as default
             # Time
             "avg_trade_duration_minutes": avg_duration,
             "trades_per_day": round(total_trades / trading_days, 2),
@@ -173,6 +201,36 @@ class PerformanceAnalyzer:
             ret = daily_pnl[d] / capital if capital > 0 else 0
             returns.append(ret)
             capital += daily_pnl[d]
+
+        return returns
+
+    def _compute_monthly_returns(self) -> list[float]:
+        """Compute monthly return percentages."""
+        monthly_pnl = defaultdict(float)
+        dates = []
+        for t in self.trades:
+            d = t.get("exit_date") or t.get("entry_date")
+            if d:
+                dates.append(str(d))
+                monthly_pnl[str(d)[:7]] += t.get("net_pnl", 0)
+
+        if not dates:
+            return []
+
+        import pandas as pd
+        start_month = min(dates)[:7]
+        end_month = max(dates)[:7]
+        
+        all_months = pd.date_range(start=f"{start_month}-01", end=f"{end_month}-01", freq='MS')
+        month_keys = [d.strftime('%Y-%m') for d in all_months]
+        
+        capital = self.initial_capital
+        returns = []
+        for m in month_keys:
+            pnl = monthly_pnl.get(m, 0.0)
+            ret = pnl / capital if capital > 0 else 0
+            returns.append(ret)
+            capital += pnl
 
         return returns
 
@@ -291,7 +349,12 @@ class PerformanceAnalyzer:
         print(f"  Win Rate: {r['win_rate_pct']}%")
         print(f"  Net P&L: ₹{r['total_return_abs']:,.2f}")
         print(f"  Return: {r['total_return_pct']}%")
-        print(f"  Sharpe: {r['sharpe_ratio']}")
+        print(f"  Sharpe (Monthly - Use This): {r['sharpe_monthly']}")
+        print(f"  Sharpe (Trade Days Only): {r['sharpe_trade_days']}")
+        print(f"  Sharpe (Inflated - DO NOT USE): {r['sharpe_inflated_DO_NOT_USE']}")
+        print(f"  Sortino (Monthly): {r.get('sortino_monthly', 0)}")
+        print(f"  Calmar Ratio: {r.get('calmar_ratio', 0)}")
+        print(f"  Recovery Factor: {r.get('recovery_factor', 0)}")
         print(f"  Max DD: {r['max_drawdown_pct']}%")
         print(f"  Profit Factor: {r['profit_factor']}")
         print(f"  Expectancy: ₹{r['expectancy']:,.2f}")

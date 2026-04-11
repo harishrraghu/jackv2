@@ -58,8 +58,9 @@ class RiskManager:
         self.daily_pnl = 0.0
         self.trades_today = 0
         self.open_position: Optional[dict] = None
+        self.stopped_out_strategies_today: set = set()
 
-    def calculate_position_size(self, entry_price: float, stop_loss: float) -> int:
+    def calculate_position_size(self, entry_price: float, stop_loss: float, risk_override_pct: float = None) -> int:
         """
         Calculate position size based on risk budget.
 
@@ -84,14 +85,15 @@ class RiskManager:
         if stop_distance <= 0:
             return 0
 
-        risk_amount = self.current_capital * self.max_risk_per_trade_pct / 100
+        risk_pct = risk_override_pct if risk_override_pct is not None else self.max_risk_per_trade_pct
+        risk_amount = self.current_capital * risk_pct / 100
         raw_quantity = risk_amount / stop_distance
 
         # Round DOWN to nearest lot_size multiple
         lots = int(raw_quantity // self.lot_size)
 
-        # Cap at 10 lots max (prevents catastrophic sizing from tight stops)
-        max_lots = 10
+        # Cap at 30 lots max to prevent catastrophic sizing, while allowing core alpha to scale
+        max_lots = 30
         lots = min(lots, max_lots)
 
         quantity = lots * self.lot_size
@@ -102,15 +104,22 @@ class RiskManager:
         return quantity
 
     def calculate_costs(self, entry_price: float, exit_price: float,
-                        quantity: int, direction: str) -> dict:
+                        quantity: int, direction: str,
+                        instrument_type: str = "futures") -> dict:
         """
         Calculate all transaction costs for a trade.
+
+        STT rates by instrument type:
+          - Futures: 0.0125% on sell side only
+          - Options: 0.0625% on sell side only (for future options support)
+          - Equity delivery: 0.1% on both sides (not used in Jack)
 
         Args:
             entry_price: Entry price.
             exit_price: Exit price.
             quantity: Number of units traded.
             direction: "LONG" or "SHORT".
+            instrument_type: "futures", "options", or "equity".
 
         Returns:
             Dict with each cost component and total.
@@ -121,11 +130,18 @@ class RiskManager:
         brokerage_entry = turnover_entry * self.brokerage_pct / 100
         brokerage_exit = turnover_exit * self.brokerage_pct / 100
 
+        # STT rate lookup by instrument type
+        stt_rate = {
+            "futures": 0.0125,
+            "options": 0.0625,
+            "equity": 0.1,
+        }.get(instrument_type, 0.0125) / 100
+
         # STT only on sell side
         if direction == "LONG":
-            stt = turnover_exit * self.stt_sell_pct / 100  # Sell side = exit
+            stt = turnover_exit * stt_rate  # Sell side = exit
         else:
-            stt = turnover_entry * self.stt_sell_pct / 100  # Sell side = entry for shorts
+            stt = turnover_entry * stt_rate  # Sell side = entry for shorts
 
         slippage = self.slippage_ticks * self.tick_size * quantity * 2  # Entry + exit
 
@@ -159,6 +175,10 @@ class RiskManager:
         if self.open_position is not None:
             return False, "position_already_open"
 
+        # Block re-entry from a strategy that was stopped out today
+        if signal is not None and signal.strategy_name in self.stopped_out_strategies_today:
+            return False, "strategy_stopped_out_today"
+
         # Max trades per day
         if self.trades_today >= self.max_trades_per_day:
             return False, "max_trades_reached"
@@ -174,7 +194,9 @@ class RiskManager:
 
         # Check position size if signal provided
         if signal is not None:
-            qty = self.calculate_position_size(signal.entry_price, signal.stop_loss)
+            risk_mult = signal.metadata.get("risk_multiplier", 1.0)
+            adjusted_risk_pct = self.max_risk_per_trade_pct * risk_mult
+            qty = self.calculate_position_size(signal.entry_price, signal.stop_loss, adjusted_risk_pct)
             if qty == 0:
                 return False, "insufficient_capital_for_stop"
 
@@ -192,7 +214,9 @@ class RiskManager:
         Returns:
             Position dict with all trade details.
         """
-        quantity = self.calculate_position_size(signal.entry_price, signal.stop_loss)
+        risk_mult = signal.metadata.get("risk_multiplier", 1.0)
+        adjusted_risk_pct = self.max_risk_per_trade_pct * risk_mult
+        quantity = self.calculate_position_size(signal.entry_price, signal.stop_loss, adjusted_risk_pct)
 
         # Apply entry slippage (worse price for trader)
         slippage_amount = self.slippage_ticks * self.tick_size
@@ -291,6 +315,10 @@ class RiskManager:
             "metadata": pos.get("metadata", {}),
         }
 
+        # Track stop-outs to block same-strategy re-entry
+        if exit_signal.reason == "stop_hit":
+            self.stopped_out_strategies_today.add(pos["strategy"])
+
         # Clear position
         self.open_position = None
 
@@ -300,6 +328,7 @@ class RiskManager:
         """Reset daily counters. Called at start of each new trading day."""
         self.daily_pnl = 0.0
         self.trades_today = 0
+        self.stopped_out_strategies_today = set()
 
     def get_drawdown(self) -> dict:
         """

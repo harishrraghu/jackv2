@@ -18,12 +18,14 @@ import yaml
 
 from data.loader import load_all_timeframes, get_daily_iterator, get_lookback
 from data.splits import DataSplits, validate_no_leakage
+from data.global_data import load_global_data, get_premarket_context
 from indicators.registry import IndicatorRegistry
 from engine.risk import RiskManager
 from engine.state_machine import StateMachine
 from engine.scorer import StrategyScorer
 from engine.filters import run_filter_stack
 from journal.logger import JournalLogger
+from analysis.post_trade import PostTradeAnalyzer
 
 # Import strategies
 from strategies.first_hour_verdict import FirstHourVerdict
@@ -31,6 +33,9 @@ from strategies.gap_fill import GapFill
 from strategies.streak_fade import StreakFade
 from strategies.bb_squeeze import BBSqueezeBreakout
 from strategies.gap_up_fade import GapUpFade
+from strategies.vwap_reversion import VWAPReversion
+from strategies.theta_harvest import ThetaHarvest
+from strategies.afternoon_breakout import AfternoonBreakout
 
 # Import single-day indicator functions
 from indicators.orb import compute_single_day as orb_single_day
@@ -74,6 +79,14 @@ class Simulator:
         self.risk_manager = RiskManager(config_path=config_path)
         self.state_machine = StateMachine()
 
+        # Load global pre-market data (gracefully — no crash if files missing)
+        try:
+            self._global_data = load_global_data(
+                os.path.join(self.base_dir, "data", "raw", "global")
+            )
+        except Exception:
+            self._global_data = {}
+
         # Initialize strategies
         self.strategies = {
             "first_hour_verdict": FirstHourVerdict(),
@@ -81,12 +94,31 @@ class Simulator:
             "streak_fade": StreakFade(),
             "bb_squeeze": BBSqueezeBreakout(),
             "gap_up_fade": GapUpFade(),
+            "vwap_reversion": VWAPReversion(),
+            "theta_harvest": ThetaHarvest(),
+            "afternoon_breakout": AfternoonBreakout(),
         }
 
-        self.scorer = StrategyScorer(self.strategies)
+        # Load AI retrospective insight weights (if any saved insights exist)
+        try:
+            from brain.retrospective import get_scorer_adjustments
+            _knowledge_dir = os.path.join(self.base_dir, "brain", "knowledge")
+            insight_weights = get_scorer_adjustments(_knowledge_dir)
+            if insight_weights:
+                print(f"[Scorer] Loaded insight weights: {insight_weights}")
+        except Exception:
+            insight_weights = {}
+
+        self.scorer = StrategyScorer(
+            self.strategies,
+            min_score_threshold=0.4,
+            insight_weights=insight_weights,
+        )
         self.journal = JournalLogger(
             output_dir=os.path.join(self.base_dir, "journal", "logs")
         )
+        self._pta = PostTradeAnalyzer()
+        self._missed_trades_today = []
 
         # Validate all strategy params
         for strat in self.strategies.values():
@@ -144,6 +176,20 @@ class Simulator:
         # Reset risk manager
         self.risk_manager = RiskManager(config_path=self.config_path)
 
+        self.diagnostics_summary = {
+            "total_days": 0,
+            "per_strategy_summary": {
+                s: {
+                    "days_eligible": 0,
+                    "base_condition_met": 0,
+                    "signal_generated": 0,
+                    "passed_filters": 0,
+                    "passed_scorer": 0,
+                    "reason_histogram": {}
+                } for s in self.strategies
+            }
+        }
+
         # Initialize tracking
         trade_log = []
         day_logs = []
@@ -160,6 +206,17 @@ class Simulator:
             date = day_data["date"]
             self.risk_manager.reset_daily()
             self.scorer.clear_log()
+            self._missed_trades_today = []
+            
+            self.diagnostics_summary["total_days"] += 1
+            self.today_diagnostics = {
+                s: {
+                    "eligible_phase": False,
+                    "base_condition_met": False,
+                    "signal_generated": False,
+                    "reason_skipped": "not_eligible_today"
+                } for s in self.strategies
+            }
 
             # Get lookback
             lookback = get_lookback(data, date, n_days=60)
@@ -219,6 +276,45 @@ class Simulator:
             if not day_trades:
                 no_trade_days += 1
 
+            # Save diagnostics for the day
+            decision_log = self.scorer.get_decision_log()
+            for s_name, d_status in self.today_diagnostics.items():
+                ds = self.diagnostics_summary["per_strategy_summary"][s_name]
+                if d_status["eligible_phase"]:
+                    ds["days_eligible"] += 1
+                if d_status["base_condition_met"]:
+                    ds["base_condition_met"] += 1
+                if d_status["signal_generated"]:
+                    ds["signal_generated"] += 1
+                
+                passed_filters = False
+                passed_scorer = False
+                for d_log in decision_log:
+                    if d_log.get("reason") == "no_signals": continue
+                    for sc in d_log.get("all_scores", []):
+                        if sc["strategy"] == s_name:
+                            passed_filters = True
+                    if d_log.get("selected") and d_log["selected"]["strategy"] == s_name:
+                        passed_scorer = True
+                        
+                if passed_filters:
+                    ds["passed_filters"] += 1
+                if passed_scorer:
+                    ds["passed_scorer"] += 1
+                    
+                final_reason = "traded"
+                if not d_status["eligible_phase"]:
+                    final_reason = "not_eligible_today"
+                elif not passed_scorer:
+                    if passed_filters:
+                        final_reason = "lost_to_better_signal"
+                    elif d_status["signal_generated"]:
+                        final_reason = "scored_below_threshold"
+                    else:
+                        final_reason = d_status.get("reason_skipped", "unknown")
+                
+                ds["reason_histogram"][final_reason] = ds["reason_histogram"].get(final_reason, 0) + 1
+
             # Log the day
             capital_state = self.risk_manager.get_state()
             equity_curve.append((
@@ -233,6 +329,7 @@ class Simulator:
                     trade_events=day_trades,
                     decision_log=self.scorer.get_decision_log(),
                     capital_state=capital_state,
+                    missed_opportunities=self._missed_trades_today,
                 )
             except Exception as e:
                 print(f"  [WARN] Journal write failed: {e}", file=sys.stderr)
@@ -247,11 +344,33 @@ class Simulator:
                     f"DD: {dd['current_drawdown_pct']:.2f}%"
                 )
 
+        # Trigger AI retrospective after simulation completes
+        try:
+            from brain.retrospective import run_retrospective
+            journal_logs_dir = os.path.join(self.base_dir, "journal", "logs")
+            knowledge_dir = os.path.join(self.base_dir, "brain", "knowledge")
+            if verbose:
+                print("\n[Retrospective] Running AI retrospective on completed simulation...")
+            run_retrospective(
+                journal_logs_dir=journal_logs_dir,
+                knowledge_dir=knowledge_dir,
+                after_date=None,
+                before_date=measure_end,
+            )
+        except Exception as e:
+            if verbose:
+                print(f"  [WARN] AI retrospective skipped: {e}")
+
         # Compute final results
         results = self._compute_results(
             trade_log, equity_curve, total_days, no_trade_days,
             measure_start, measure_end,
         )
+
+        import json
+        diag_path = os.path.join(self.base_dir, "journal", "logs", "diagnostics_summary.json")
+        with open(diag_path, "w") as df:
+            json.dump(self.diagnostics_summary, df, indent=2)
 
         # Log summary
         try:
@@ -260,6 +379,101 @@ class Simulator:
             print(f"  [WARN] Summary write failed: {e}", file=sys.stderr)
 
         return results
+
+    def run_single_day(self, day_data: dict, lookback: dict, verbose: bool = False, briefing_only: bool = False) -> dict:
+        """
+        Run simulation for a single trading day.
+        Designed for live/paper trading where we only have today's data and past lookback.
+        
+        Args:
+            day_data: Dict of DataFrames for the current day ("date", "daily", "15m", etc).
+            lookback: Dict of historical data before today.
+            verbose: Print details.
+            
+        Returns:
+            Dict containing the briefing, trades, and end-of-day capital state.
+        """
+        date = day_data["date"]
+        self.risk_manager.reset_daily()
+        self.scorer.clear_log()
+        self._missed_trades_today = []
+
+        # Combine lookback daily and today's daily to compute indicators correctly
+        lb_daily = lookback.get("1d", pd.DataFrame())
+        today_daily = day_data.get("daily", pd.DataFrame())
+        
+        if not lb_daily.empty and not today_daily.empty:
+            combined_daily = pd.concat([lb_daily, today_daily], ignore_index=True)
+            combined_idx = len(combined_daily) - 1 # Today is the last row
+        elif not today_daily.empty:
+            combined_daily = today_daily
+            combined_idx = 0
+        else:
+            return {"error": "no_daily_data"}
+
+        # Compute daily indicators
+        daily_with_indicators = self._compute_daily_indicators(combined_daily)
+        
+        # Get today's indicator values (the last row)
+        today_indicators = self._get_today_indicators(daily_with_indicators, date, lookback)
+
+        # Compute intraday indicators
+        orb_data = orb_single_day(day_data.get("15m", pd.DataFrame()))
+        fh_data = fh_single_day(day_data.get("1h", pd.DataFrame()))
+
+        # Build morning briefing
+        briefing = self._build_briefing(
+            date, today_indicators, orb_data, fh_data, lookback
+        )
+
+        # Run filter stack
+        filters = run_filter_stack(
+            date,
+            lookback_daily={
+                "Bull_Streak": today_indicators.get("Bull_Streak", 0),
+                "Bear_Streak": today_indicators.get("Bear_Streak", 0),
+                "avg_ATR_60d": today_indicators.get("avg_ATR_60d", None),
+            },
+            indicators={
+                "RSI": today_indicators.get("RSI"),
+                "hourly_RSI": None, # Will be computed locally if needed
+                "ATR": today_indicators.get("ATR"),
+                "Regime": today_indicators.get("Regime", "normal"),
+            },
+        )
+        briefing["filters"] = filters
+        
+        if briefing_only:
+            return {"date": date, "briefing": briefing}
+
+        # Simulate intraday
+        day_trades = self._simulate_intraday(
+            day_data, briefing, date, today_indicators,
+            orb_data, fh_data, filters, verbose,
+        )
+
+        capital_state = self.risk_manager.get_state()
+
+        try:
+            self.journal.log_day(
+                date=date,
+                briefing=briefing,
+                trade_events=day_trades,
+                decision_log=self.scorer.get_decision_log(),
+                capital_state=capital_state,
+                missed_opportunities=self._missed_trades_today,
+            )
+        except Exception as e:
+            print(f"  [WARN] Journal write failed: {e}", file=sys.stderr)
+
+        return {
+            "date": date,
+            "briefing": briefing,
+            "trades": day_trades,
+            "decision_log": self.scorer.get_decision_log(),
+            "capital_state": capital_state,
+            "daily_pnl": self.risk_manager.daily_pnl
+        }
 
     def _compute_daily_indicators(self, daily: pd.DataFrame) -> pd.DataFrame:
         """Pre-compute all daily indicators."""
@@ -357,6 +571,7 @@ class Simulator:
             },
             "capital": self.risk_manager.current_capital,
             "drawdown": self.risk_manager.get_drawdown(),
+            "global": get_premarket_context(date, self._global_data),
         }
 
     def _simulate_intraday(
@@ -369,6 +584,18 @@ class Simulator:
         Returns list of trade result dicts.
         """
         trades_today = []
+
+        day_5m = day_data.get("5m", pd.DataFrame())
+        intraday_indicators_5m = {}
+        if not day_5m.empty and len(day_5m) >= 14:
+            try:
+                day_5m_ind = self.indicator_registry.compute("rsi", day_5m, period=14)
+                day_5m_ind = self.indicator_registry.compute("ema", day_5m_ind, period=9)
+                day_5m_ind = self.indicator_registry.compute("ema", day_5m_ind, period=21)
+                day_5m_ind = self.indicator_registry.compute("vwap", day_5m_ind)
+                intraday_indicators_5m = day_5m_ind
+            except Exception:
+                pass
 
         # Generate 15-min time steps
         times = self._generate_time_steps()
@@ -391,6 +618,18 @@ class Simulator:
             if candle is not None:
                 day_high = max(day_high, candle.get("High", current_price))
                 day_low = min(day_low, candle.get("Low", current_price))
+
+            # Classification of day type at 10:30
+            if time_str == "10:30":
+                day_type = self._pta.classify_day_type(day_data, briefing)
+                briefing["day_type"] = day_type
+                
+                if self.risk_manager.open_position is not None:
+                    pos = self.risk_manager.open_position
+                    if day_type in ("trend_up", "trend_down"):
+                        pos["target_mode"] = "trailing"
+                    elif day_type == "range":
+                        pos["target_mode"] = "quick_profit"
 
             # Check if we must exit all (closing phase)
             if self.state_machine.must_exit_all(time_str):
@@ -421,6 +660,17 @@ class Simulator:
             # Check exits for open position
             if self.risk_manager.open_position is not None:
                 pos = self.risk_manager.open_position
+                
+                # Update max/min price since entry for trailing stops
+                meta = pos.get("metadata", {})
+                candle_high = candle.get("High", current_price) if candle is not None else current_price
+                candle_low = candle.get("Low", current_price) if candle is not None else current_price
+                
+                if pos["direction"] == "LONG":
+                    meta["max_price_since_entry"] = max(meta.get("max_price_since_entry", pos["entry_price"]), candle_high)
+                else:
+                    meta["min_price_since_entry"] = min(meta.get("min_price_since_entry", pos["entry_price"]), candle_low)
+                    
                 strategy = self.strategies.get(pos["strategy"])
 
                 # Check stops via candle low/high
@@ -470,10 +720,22 @@ class Simulator:
                 eligible = self.state_machine.get_eligible_strategies(time_str)
                 if not eligible:
                     continue
+                if "ALL" in eligible:
+                    eligible = list(self.strategies.keys())
+
+                # Get 5m indicators
+                inds_5m = self._get_5m_indicators_at_time(intraday_indicators_5m, time_str)
+                briefing["5m_indicators"] = inds_5m
 
                 # Build indicator context for strategies
                 strat_indicators = {
                     "current_price": current_price,
+                    "rsi_5m": inds_5m.get("rsi_5m"),
+                    "ema_9_5m": inds_5m.get("ema_9_5m"),
+                    "ema_21_5m": inds_5m.get("ema_21_5m"),
+                    "vwap": inds_5m.get("vwap"),
+                    "vwap_upper": inds_5m.get("vwap_upper"),
+                    "vwap_lower": inds_5m.get("vwap_lower"),
                     "daily": {
                         "ATR": indicators.get("ATR"),
                         "RSI": indicators.get("RSI"),
@@ -509,7 +771,8 @@ class Simulator:
                 # Compute 15m BB data for BB squeeze strategy
                 if "bb_squeeze" in eligible and not day_15m.empty:
                     try:
-                        bb_15m = self.indicator_registry.compute("bbands", day_15m, period=20)
+                        # Use period=10 so BB is valid by 12:15 (~13 candles in the day)
+                        bb_15m = self.indicator_registry.compute("bbands", day_15m, period=10)
                         current_bb = bb_15m[bb_15m["Time"] <= time_str]
                         if not current_bb.empty:
                             last = current_bb.iloc[-1]
@@ -528,15 +791,33 @@ class Simulator:
                     strategy = self.strategies.get(strat_name)
                     if strategy is None:
                         continue
+                        
+                    if hasattr(self, 'today_diagnostics'):
+                        strat_diag = self.today_diagnostics[strat_name]
+                        strat_diag["eligible_phase"] = True
+                        if strat_diag["reason_skipped"] == "not_eligible_today":
+                            strat_diag["reason_skipped"] = "time_passed_no_signal"
 
                     try:
+                        temp_diag = {}
                         signal = strategy.check_entry(
                             day_data=day_data,
                             lookback={},
                             indicators=strat_indicators,
                             current_time=time_str,
                             filters=filters,
+                            diagnostics=temp_diag,
                         )
+                        if hasattr(self, 'today_diagnostics'):
+                            strat_diag = self.today_diagnostics[strat_name]
+                            if temp_diag.get("base_condition_met"):
+                                strat_diag["base_condition_met"] = True
+                            if temp_diag.get("signal_generated"):
+                                strat_diag["signal_generated"] = True
+                                strat_diag["reason_skipped"] = None
+                            elif not strat_diag["signal_generated"] and temp_diag.get("reason_skipped"):
+                                strat_diag["reason_skipped"] = temp_diag["reason_skipped"]
+
                         if signal is not None:
                             signals.append(signal)
                     except Exception as e:
@@ -546,6 +827,13 @@ class Simulator:
                 if not signals:
                     continue
 
+                # Adaptive Context Estimation
+                live_context = {
+                    "regime": indicators.get("Regime", "normal"),
+                    "gap_type": indicators.get("Gap_Type", "flat"),
+                    "time": time_str,
+                }
+                
                 # Score and select
                 selected = self.scorer.select_trade(signals, filters)
                 if selected is None:
@@ -554,9 +842,29 @@ class Simulator:
                 # Risk check
                 can_trade, reason = self.risk_manager.can_trade(selected)
                 if not can_trade:
-                    if verbose and reason != "position_already_open":
-                        print(f"  {time_str} BLOCKED: {selected.strategy_name} — {reason}")
+                    if reason != "position_already_open":
+                        missed = self._pta.analyze_missed_trade(selected, reason, day_data)
+                        self._missed_trades_today.append(missed)
+                        if verbose:
+                            print(f"  {time_str} BLOCKED: {selected.strategy_name} — {reason}")
                     continue
+
+                # Try 5m pullback entry
+                from strategies.base import TradeSignal
+                pullback_price, pullback_time = self._find_pullback_entry_5m(
+                    day_data, selected, time_str
+                )
+                if pullback_price != selected.entry_price:
+                    selected = TradeSignal(
+                        strategy_name=selected.strategy_name,
+                        direction=selected.direction,
+                        entry_price=pullback_price,
+                        stop_loss=selected.stop_loss,
+                        target=selected.target,
+                        confidence=selected.confidence + 0.05,
+                        reason=selected.reason + f" [5m pullback entry at {pullback_time}]",
+                        metadata={**selected.metadata, "pullback_entry": True, "original_entry": selected.entry_price},
+                    )
 
                 # Execute entry
                 position = self.risk_manager.execute_entry(selected)
@@ -574,7 +882,74 @@ class Simulator:
                         f"Qty={position['quantity']}"
                     )
 
+        for t in trades_today:
+            t["post_mortem"] = self._pta.analyze_trade(t, day_data, indicators)
+
         return trades_today
+
+    def _get_5m_indicators_at_time(self, day_5m_ind, time_str):
+        """Get 5m indicator values at or before the given time."""
+        if day_5m_ind is None or isinstance(day_5m_ind, dict) or day_5m_ind.empty:
+            return {}
+
+        available = day_5m_ind[day_5m_ind["Time"].str.strip() <= time_str]
+        if available.empty:
+            return {}
+
+        last = available.iloc[-1]
+        return {
+            "rsi_5m": last.get("RSI"),
+            "ema_9_5m": last.get("EMA_9"),
+            "ema_21_5m": last.get("EMA_21"),
+            "vwap": last.get("VWAP"),
+            "vwap_upper": last.get("VWAP_Upper"),
+            "vwap_lower": last.get("VWAP_Lower"),
+        }
+
+    def _find_pullback_entry_5m(self, day_data, signal, start_time, max_wait_candles=6):
+        """
+        After a strategy signal fires, scan 5m candles for a pullback entry.
+        """
+        day_5m = day_data.get("5m", pd.DataFrame())
+        if day_5m.empty:
+            return signal.entry_price, start_time
+
+        fh_data = signal.metadata.get("fh_return", 0)
+        fh_range = signal.metadata.get("fh_range", 0)
+
+        # Get 5m candles after start_time
+        after_signal = day_5m[day_5m["Time"].str.strip() >= start_time].head(max_wait_candles)
+
+        if after_signal.empty:
+            return signal.entry_price, start_time
+
+        for _, candle in after_signal.iterrows():
+            candle_time = str(candle["Time"]).strip()
+
+            if signal.direction == "LONG":
+                # Look for a dip (retracement) then bullish close
+                retracement = signal.entry_price - candle["Low"]
+                if fh_range > 0:
+                    retrace_pct = retracement / fh_range
+                else:
+                    retrace_pct = 0
+
+                # Accept if price pulled back 20-60% of FH range and candle is bullish
+                if 0.2 <= retrace_pct <= 0.6 and candle["Close"] > candle["Open"]:
+                    return float(candle["Close"]), candle_time[:5]
+
+            elif signal.direction == "SHORT":
+                retracement = candle["High"] - signal.entry_price
+                if fh_range > 0:
+                    retrace_pct = retracement / fh_range
+                else:
+                    retrace_pct = 0
+
+                if 0.2 <= retrace_pct <= 0.6 and candle["Close"] < candle["Open"]:
+                    return float(candle["Close"]), candle_time[:5]
+
+        # No pullback found
+        return signal.entry_price, start_time
 
     def _generate_time_steps(self) -> list[str]:
         """Generate 15-minute time steps from 09:15 to 15:30."""
@@ -667,6 +1042,36 @@ class Simulator:
 
         return None
 
+    def _compute_sharpe_from_equity(self, equity_curve, risk_free_annual=0.065):
+        """Compute Sharpe from daily equity returns including flat days."""
+        if len(equity_curve) < 2:
+            return 0.0
+
+        # Extract daily equity values
+        daily_values = [eq[1] for eq in equity_curve]
+
+        # Compute daily returns (including zero-return flat days)
+        daily_returns = []
+        for i in range(1, len(daily_values)):
+            if daily_values[i-1] > 0:
+                ret = (daily_values[i] - daily_values[i-1]) / daily_values[i-1]
+                daily_returns.append(ret)
+
+        if len(daily_returns) < 2:
+            return 0.0
+
+        daily_returns = np.array(daily_returns)
+        risk_free_daily = risk_free_annual / 252
+
+        excess_returns = daily_returns - risk_free_daily
+        mean_excess = np.mean(excess_returns)
+        std_returns = np.std(daily_returns, ddof=1)
+
+        if std_returns <= 0:
+            return 0.0
+
+        return float(mean_excess / std_returns * math.sqrt(252))
+
     def _compute_results(
         self, trade_log, equity_curve, total_days, no_trade_days,
         start_date, end_date,
@@ -704,16 +1109,19 @@ class Simulator:
             dd = (peak - capital) / peak * 100 if peak > 0 else 0
             max_dd = max(max_dd, dd)
 
-        # Simple Sharpe approximation
+        # Sharpe from daily equity returns (including flat/no-trade days)
+        sharpe = self._compute_sharpe_from_equity(equity_curve)
+
+        # Keep old per-trade calculation for reference
         daily_pnls = [t.get("net_pnl", 0) for t in trade_log]
         if len(daily_pnls) > 1:
             mean_pnl = np.mean(daily_pnls)
             std_pnl = np.std(daily_pnls, ddof=1)
-            risk_free_daily = (0.065 / 252) * initial  # 6.5% annualized
-            sharpe = ((mean_pnl - risk_free_daily) / std_pnl * math.sqrt(252)
-                      if std_pnl > 0 else 0)
+            risk_free_daily = (0.065 / 252) * initial
+            sharpe_inflated = ((mean_pnl - risk_free_daily) / std_pnl * math.sqrt(252)
+                               if std_pnl > 0 else 0)
         else:
-            sharpe = 0.0
+            sharpe_inflated = 0.0
 
         # By strategy breakdown
         by_strategy = {}

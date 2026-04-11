@@ -6,10 +6,11 @@ it predicts the day's close direction 79.7% of the time. The day high/low is
 set AFTER the first hour 68-72% of the time, so pullback entry is optimal.
 
 Parameters (4 of 5 budget):
-    min_fh_move_pct: 0.4
+    min_fh_move_pct: 0.3
     atr_stop_multiplier: 0.5
-    atr_target_multiplier: 1.5
-    trail_breakeven_atr: 1.0
+    atr_target_multiplier: 2.0
+    trail_atr_trigger: 1.0
+    trail_atr_distance: 0.5
 """
 
 from typing import Optional
@@ -22,10 +23,12 @@ class FirstHourVerdict(Strategy):
 
     def __init__(self, params: dict = None):
         default_params = {
-            "min_fh_move_pct": 0.4,
+            "min_fh_move_pct": 0.3,
             "atr_stop_multiplier": 0.5,
-            "atr_target_multiplier": 1.5,
-            "trail_breakeven_atr": 1.0,
+            "atr_target_multiplier": 2.0,
+            "trail_atr_trigger": 1.0,
+            "trail_atr_distance": 0.5,
+            "use_ema_filter": True,  # Set to False to disable EMA crossover confidence penalty
         }
         if params:
             default_params.update(params)
@@ -41,6 +44,7 @@ class FirstHourVerdict(Strategy):
         indicators: dict,
         current_time: str,
         filters: dict,
+        diagnostics: dict = None,
     ) -> Optional[TradeSignal]:
         """
         Check entry conditions based on first hour move.
@@ -56,8 +60,14 @@ class FirstHourVerdict(Strategy):
         fh_return = fh.get("FH_Return")
         fh_direction = fh.get("FH_Direction", 0)
         fh_strong = fh.get("FH_Strong", False)
+        fh_range = fh.get("FH_Range", 0)
+
+        if diagnostics is not None:
+            diagnostics["base_condition_met"] = fh_strong
 
         if not fh_strong or fh_return is None:
+            if diagnostics is not None:
+                diagnostics["reason_skipped"] = f"FH_move_below_threshold"
             return None
 
         atr = daily.get("ATR")
@@ -77,39 +87,62 @@ class FirstHourVerdict(Strategy):
         target_mult = self.params["atr_target_multiplier"]
 
         if fh_direction == 1:  # Bullish first hour
-            # Trend alignment: EMA_9 > EMA_21 for longs
-            if ema_9 is not None and ema_21 is not None:
-                if ema_9 < ema_21:
-                    return None
+            confidence = 0.8 if abs(fh_return) > 0.6 else 0.75
+            
+            # Trend alignment: penalize soft confidence if EMA not aligned
+            if self.params.get("use_ema_filter", True):
+                if ema_9 is not None and ema_21 is not None:
+                    if ema_9 < ema_21:
+                        confidence = 0.65
 
-            # RSI filter: not overbought
-            if rsi is not None and rsi > 80:
+            # RSI filter: not extremely overbought
+            if rsi is not None and rsi > 85:
+                if diagnostics is not None: diagnostics["reason_skipped"] = "rsi_filter_blocked"
                 return None
 
             direction = "LONG"
             entry_price = current_price
+
+            vwap = indicators.get("vwap")
+            if vwap is not None and vwap > 0:
+                if current_price < vwap:
+                    confidence -= 0.1  # Reduce confidence, don't block
+
             stop_loss = entry_price - stop_mult * atr
             target = entry_price + target_mult * atr
-            confidence = 0.8 if abs(fh_return) > 0.6 else 0.7
 
         elif fh_direction == -1:  # Bearish first hour
-            # Trend alignment: EMA_9 < EMA_21 for shorts
-            if ema_9 is not None and ema_21 is not None:
-                if ema_9 > ema_21:
-                    return None
+            confidence = 0.8 if abs(fh_return) > 0.6 else 0.75
+            
+            # Trend alignment: penalize soft confidence if EMA not aligned
+            if self.params.get("use_ema_filter", True):
+                if ema_9 is not None and ema_21 is not None:
+                    if ema_9 > ema_21:
+                        confidence = 0.65
 
-            # RSI filter: not oversold
-            if rsi is not None and rsi < 20:
+            # RSI filter: not extremely oversold
+            if rsi is not None and rsi < 15:
+                if diagnostics is not None: diagnostics["reason_skipped"] = "rsi_filter_blocked"
                 return None
 
             direction = "SHORT"
             entry_price = current_price
+
+            vwap = indicators.get("vwap")
+            if vwap is not None and vwap > 0:
+                if current_price > vwap:
+                    confidence -= 0.1
+
             stop_loss = entry_price + stop_mult * atr
             target = entry_price - target_mult * atr
-            confidence = 0.8 if abs(fh_return) > 0.6 else 0.7
 
         else:
+            if diagnostics is not None: diagnostics["reason_skipped"] = "invalid_direction"
             return None
+
+        if diagnostics is not None:
+            diagnostics["signal_generated"] = True
+            diagnostics["reason_skipped"] = None
 
         return TradeSignal(
             strategy_name=self.name,
@@ -124,9 +157,13 @@ class FirstHourVerdict(Strategy):
             ),
             metadata={
                 "fh_return": fh_return,
+                "fh_range": fh_range,
                 "fh_direction": fh_direction,
                 "atr": atr,
                 "rsi": rsi,
+                "risk_multiplier": 2.5,  # Position sizing multiplier (2.5x base risk), not risk:reward ratio
+                "max_price_since_entry": current_price,
+                "min_price_since_entry": current_price,
             },
         )
 
@@ -148,7 +185,8 @@ class FirstHourVerdict(Strategy):
         entry_price = position.get("entry_price", 0)
         atr = position.get("metadata", {}).get("atr", 100)
 
-        trail_be_atr = self.params["trail_breakeven_atr"]
+        trail_trigger = self.params["trail_atr_trigger"]
+        trail_dist = self.params["trail_atr_distance"]
 
         # Time exit
         if current_time >= "15:15":
@@ -159,13 +197,25 @@ class FirstHourVerdict(Strategy):
             )
 
         if direction == "LONG":
-            # Stop loss
-            if current_price <= stop_loss:
-                return ExitSignal(
-                    should_exit=True,
-                    exit_price=stop_loss,
-                    reason="stop_hit",
-                )
+            max_price = position.get("metadata", {}).get("max_price_since_entry", current_price)
+            profit = max_price - entry_price
+            
+            # Standard stop/trail combo
+            if profit >= trail_trigger * atr:
+                trail_stop = max(max_price - trail_dist * atr, stop_loss)
+                if current_price <= trail_stop:
+                    return ExitSignal(
+                        should_exit=True,
+                        exit_price=trail_stop,
+                        reason="trail_stop",
+                    )
+            else:
+                if current_price <= stop_loss:
+                    return ExitSignal(
+                        should_exit=True,
+                        exit_price=stop_loss,
+                        reason="stop_hit",
+                    )
 
             # Target
             if current_price >= target:
@@ -175,24 +225,26 @@ class FirstHourVerdict(Strategy):
                     reason="target_hit",
                 )
 
-            # Trailing breakeven
-            profit = current_price - entry_price
-            if profit >= trail_be_atr * atr:
-                if current_price <= entry_price:
+        else:  # SHORT
+            min_price = position.get("metadata", {}).get("min_price_since_entry", current_price)
+            profit = entry_price - min_price
+            
+            # Standard stop/trail combo
+            if profit >= trail_trigger * atr:
+                trail_stop = min(min_price + trail_dist * atr, stop_loss)
+                if current_price >= trail_stop:
                     return ExitSignal(
                         should_exit=True,
-                        exit_price=entry_price,
+                        exit_price=trail_stop,
                         reason="trail_stop",
                     )
-
-        else:  # SHORT
-            # Stop loss
-            if current_price >= stop_loss:
-                return ExitSignal(
-                    should_exit=True,
-                    exit_price=stop_loss,
-                    reason="stop_hit",
-                )
+            else:
+                if current_price >= stop_loss:
+                    return ExitSignal(
+                        should_exit=True,
+                        exit_price=stop_loss,
+                        reason="stop_hit",
+                    )
 
             # Target
             if current_price <= target:
@@ -201,16 +253,6 @@ class FirstHourVerdict(Strategy):
                     exit_price=target,
                     reason="target_hit",
                 )
-
-            # Trailing breakeven
-            profit = entry_price - current_price
-            if profit >= trail_be_atr * atr:
-                if current_price >= entry_price:
-                    return ExitSignal(
-                        should_exit=True,
-                        exit_price=entry_price,
-                        reason="trail_stop",
-                    )
 
         return ExitSignal(should_exit=False, exit_price=current_price, reason="hold")
 
@@ -229,12 +271,12 @@ class FirstHourVerdict(Strategy):
         if day == "Friday":
             score *= 1.15
         elif day == "Tuesday":
-            score *= 0.7
+            score *= 0.75
 
         regime = filters.get("regime", "normal")
         if regime in ("trending_strong", "trending_weak"):
-            score *= 1.1
+            score *= 1.15
         elif regime == "squeeze":
-            score *= 0.8
+            score *= 1.5  # Boosted by AI Retrospective (90% Win Rate)
 
         return min(score, 2.0)

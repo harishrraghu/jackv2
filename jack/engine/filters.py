@@ -173,6 +173,55 @@ def expiry_filter(date: pd.Timestamp) -> dict:
     }
 
 
+def extreme_volatility_filter(current_atr: float, avg_atr_60d: float) -> dict:
+    """
+    Block all trading when ATR exceeds 3x the 60-day average.
+    This catches black-swan events where signals are unreliable.
+    """
+    if avg_atr_60d is None or avg_atr_60d <= 0 or current_atr is None:
+        return {"name": "extreme_volatility", "blocked": False, "multiplier": 1.0}
+
+    ratio = current_atr / avg_atr_60d
+
+    if ratio > 3.0:
+        return {
+            "name": "extreme_volatility",
+            "blocked": True,
+            "multiplier": 0.0,  # Blocks all trading
+            "atr_ratio": round(ratio, 2),
+            "reason": f"ATR {current_atr:.0f} is {ratio:.1f}x the 60d avg {avg_atr_60d:.0f}"
+        }
+    elif ratio > 2.0:
+        return {
+            "name": "extreme_volatility",
+            "blocked": False,
+            "multiplier": 0.5,  # Half size
+            "atr_ratio": round(ratio, 2),
+        }
+
+    return {"name": "extreme_volatility", "blocked": False, "multiplier": 1.0, "atr_ratio": round(ratio, 2)}
+
+
+def _combine_multipliers(multipliers: list[float], weights: list[float] = None) -> float:
+    """
+    Combine filter multipliers using weighted average instead of multiplication.
+
+    Prevents extreme compounding. Floor at 0.3, ceiling at 1.5.
+    """
+    if not multipliers:
+        return 1.0
+
+    if weights is None:
+        weights = [1.0] * len(multipliers)
+
+    total_weight = sum(weights)
+    weighted_sum = sum(m * w for m, w in zip(multipliers, weights))
+    combined = weighted_sum / total_weight if total_weight > 0 else 1.0
+
+    # Floor and ceiling
+    return max(0.3, min(1.5, combined))
+
+
 def run_filter_stack(
     date: pd.Timestamp,
     lookback_daily: dict,
@@ -203,26 +252,28 @@ def run_filter_stack(
     vol = volatility_filter(current_atr, avg_atr_60d)
     streak = streak_filter(bull_streak, bear_streak)
     expiry = expiry_filter(date)
+    ext_vol = extreme_volatility_filter(current_atr, avg_atr_60d)
 
-    # Compute combined multipliers
-    combined_long = (
-        dow["long_multiplier"]
-        * rsi["long_multiplier"]
-        * vol["multiplier"]
-        * streak["long_multiplier"]
-        * expiry["multiplier"]
-    )
+    # Compute combined multipliers using weighted average
+    long_mults = [
+        dow["long_multiplier"], rsi["long_multiplier"],
+        vol["multiplier"], streak["long_multiplier"], expiry["multiplier"]
+    ]
+    # We do not include ext_vol in the weighted average as it has a blocking nature
+    # We can multiply extreme volatility multiplier at the end, or apply it as a separate rule. 
+    # Since ext_vol returns 0.5 or 0.0, we will multiply it after weighted average.
+    
+    short_mults = [
+        dow["short_multiplier"], rsi["short_multiplier"],
+        vol["multiplier"], streak["short_multiplier"], expiry["multiplier"]
+    ]
+    
+    weights = [1.5, 1.2, 1.0, 1.0, 0.8]
+    combined_long = _combine_multipliers(long_mults, weights) * ext_vol["multiplier"]
+    combined_short = _combine_multipliers(short_mults, weights) * ext_vol["multiplier"]
 
-    combined_short = (
-        dow["short_multiplier"]
-        * rsi["short_multiplier"]
-        * vol["multiplier"]
-        * streak["short_multiplier"]
-        * expiry["multiplier"]
-    )
-
-    # Trade blocked if combined multiplier too low
-    trade_blocked = combined_long < 0.3 and combined_short < 0.3
+    # Trade blocked if strongest single filter is < 0.2, OR extreme volatility blocks it
+    trade_blocked = (min(long_mults) < 0.2 and min(short_mults) < 0.2) or ext_vol.get("blocked", False)
 
     return {
         "day_of_week": dow["day"],
@@ -232,6 +283,7 @@ def run_filter_stack(
             "volatility": vol,
             "streak": streak,
             "expiry": expiry,
+            "extreme_volatility": ext_vol,
         },
         "combined_long_multiplier": round(combined_long, 4),
         "combined_short_multiplier": round(combined_short, 4),
