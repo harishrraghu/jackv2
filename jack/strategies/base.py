@@ -32,7 +32,8 @@ class ExitSignal:
     """Output of a strategy's check_exit method."""
     should_exit: bool
     exit_price: float
-    reason: str             # "target_hit", "stop_hit", "time_exit", "trail_stop", "filter_exit"
+    reason: str             # "target_hit", "stop_hit", "time_exit", "trail_stop", "filter_exit", "partial_exit"
+    partial_pct: Optional[float] = None  # E.g., 0.5 for 50% exit
 
 
 class Strategy(ABC):
@@ -134,3 +135,52 @@ class Strategy(ABC):
                 f"Strategy '{self.name}' has {len(tunable)} tunable params "
                 f"(max {self.max_params}): {tunable}. Reduce to prevent overfitting."
             )
+
+class PositionManager:
+    """Manages position lifecycle with partial exits and adaptive stops."""
+    
+    def manage(self, position: dict, current_price: float, current_time: str, attr: float, day_type: str) -> Optional[ExitSignal]:
+        """
+        Checks adaptive rules and alters position.
+        Returns Optional[ExitSignal] if a partial exit is triggered.
+        """
+        if not attr or attr <= 0:
+            return None
+        
+        entry_price = position["entry_price"]
+        direction = position["direction"]
+        meta = position.setdefault("metadata", {})
+        
+        if direction == "LONG":
+            profit = current_price - entry_price
+        else:
+            profit = entry_price - current_price
+            
+        # 1. Move stop to breakeven after 0.5 ATR profit
+        if profit >= 0.5 * attr and not meta.get("breakeven_set"):
+            meta["breakeven_set"] = True
+            if direction == "LONG":
+                position["stop_loss"] = max(position["stop_loss"], entry_price)
+            else:
+                position["stop_loss"] = min(position["stop_loss"], entry_price)
+                
+        # 2. Partial exit (50%) at 1.0 ATR
+        if profit >= 1.0 * attr and not meta.get("partial_taken"):
+            meta["partial_taken"] = True
+            return ExitSignal(True, current_price, "partial_exit", partial_pct=0.5)
+            
+        # 3. Adjust targets based on day type
+        if "adaptive_applied" not in meta:
+            if day_type == "range":
+                if direction == "LONG":
+                    position["target"] -= 0.3 * attr
+                else:
+                    position["target"] += 0.3 * attr
+            elif day_type in ("trend_up", "trend_down"):
+                if direction == "LONG":
+                    position["target"] += 0.5 * attr
+                else:
+                    position["target"] -= 0.5 * attr
+            meta["adaptive_applied"] = True
+            
+        return None

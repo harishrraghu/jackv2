@@ -30,12 +30,11 @@ from analysis.post_trade import PostTradeAnalyzer
 # Import strategies
 from strategies.first_hour_verdict import FirstHourVerdict
 from strategies.gap_fill import GapFill
-from strategies.streak_fade import StreakFade
 from strategies.bb_squeeze import BBSqueezeBreakout
 from strategies.gap_up_fade import GapUpFade
 from strategies.vwap_reversion import VWAPReversion
-from strategies.theta_harvest import ThetaHarvest
 from strategies.afternoon_breakout import AfternoonBreakout
+from strategies.base import PositionManager
 
 # Import single-day indicator functions
 from indicators.orb import compute_single_day as orb_single_day
@@ -91,11 +90,9 @@ class Simulator:
         self.strategies = {
             "first_hour_verdict": FirstHourVerdict(),
             "gap_fill": GapFill(),
-            "streak_fade": StreakFade(),
             "bb_squeeze": BBSqueezeBreakout(),
             "gap_up_fade": GapUpFade(),
             "vwap_reversion": VWAPReversion(),
-            "theta_harvest": ThetaHarvest(),
             "afternoon_breakout": AfternoonBreakout(),
         }
 
@@ -119,6 +116,7 @@ class Simulator:
         )
         self._pta = PostTradeAnalyzer()
         self._missed_trades_today = []
+        self.position_manager = PositionManager()
 
         # Validate all strategy params
         for strat in self.strategies.values():
@@ -693,6 +691,43 @@ class Simulator:
                                 f"({result['exit_reason']})"
                             )
                         continue
+
+                # PositionManager adaptive check
+                if pos:
+                    day_type = briefing.get("day_type", "normal")
+                    attr = pos.get("metadata", {}).get("atr", indicators.get("ATR", 100))
+                    # Fallback to daily ATR if metadata missing
+                    if attr is None: attr = 100
+                    
+                    pm_signal = self.position_manager.manage(pos, current_price, time_str, attr, day_type)
+                    if pm_signal and pm_signal.should_exit:
+                        # Only handle partial exits loosely for now by updating quantity and logging a trade
+                        if pm_signal.reason == "partial_exit":
+                            qty = pos["quantity"]
+                            exit_qty = int(qty * pm_signal.partial_pct)
+                            
+                            if exit_qty >= self.risk_manager.lot_size:
+                                # We temporarily reduce the position to let `execute_exit` handle the log
+                                orig_qty = pos["quantity"]
+                                pos["quantity"] = exit_qty
+                                result = self.risk_manager.execute_exit(pm_signal, current_price)
+                                result["exit_time"] = time_str
+                                result["exit_date"] = str(date)
+                                trades_today.append(result)
+                                
+                                # Restore open position with remaining quantity
+                                pos["quantity"] = orig_qty - exit_qty
+                                self.risk_manager.open_position = pos
+                                
+                                if verbose:
+                                    pnl = result["net_pnl"]
+                                    color = "\033[92m" if pnl >= 0 else "\033[91m"
+                                    print(f"  {date.strftime('%Y-%m-%d') if hasattr(date, 'strftime') else date} "
+                                          f"{time_str} PARTIAL EXIT [{result['strategy']}] "
+                                          f"{result['direction']} "
+                                          f"@ {result['exit_price']:.1f} ({exit_qty} units) "
+                                          f"→ {color}₹{pnl:+,.0f}\033[0m")
+                                continue
 
                 # Strategy-level exit check
                 if strategy is not None:

@@ -13,11 +13,11 @@ class VWAPReversion(Strategy):
 
     def __init__(self, params: dict = None):
         default_params = {
-            "vwap_dev_pct": 0.15,
-            "rsi_extreme_short": 58,
-            "rsi_extreme_long": 42,
+            "vwap_dev_pct": 0.20,
+            "rsi_extreme_offset": 15,  # Offset from 50 (35 and 65)
             "adx_threshold": 30,
             "max_dev_stop_pct": 0.15,
+            "target_overshoot_pct": 0.10, # Target is VWAP extended by this %
         }
         if params:
             default_params.update(params)
@@ -37,20 +37,11 @@ class VWAPReversion(Strategy):
     ) -> Optional[TradeSignal]:
         """
         Check entry conditions for VWAP reversion.
-
-        Entry requires:
-        1. Price deviates > 0.3% from VWAP
-        2. 5m RSI at extreme (>70 for short, <30 for long)
-        3. ADX < 25 (range market)
-        4. Day type is not strong trend
         """
         current_price = indicators.get("current_price", 0)
         daily = indicators.get("daily", {})
         
-        # We need VWAP - compute from intraday data or use provided if available
-        vwap = indicators.get("intraday_5m", {}).get("vwap")
-        if not vwap:
-            vwap = indicators.get("vwap")
+        vwap = indicators.get("vwap")
 
         if not vwap or current_price <= 0:
             if diagnostics is not None: diagnostics["reason_skipped"] = "missing_vwap"
@@ -68,27 +59,27 @@ class VWAPReversion(Strategy):
             if diagnostics is not None: diagnostics["reason_skipped"] = f"adx_too_high: {adx:.1f}"
             return None
             
-        rsi = indicators.get("intraday_5m", {}).get("rsi", 50)
+        rsi = indicators.get("rsi_5m", 50)
 
         dev_dir = 1 if current_price > vwap else -1 # 1 means price is above VWAP (needs short)
 
         if dev_dir == 1:
-            if rsi < self.params["rsi_extreme_short"]:
+            if rsi < 50 + self.params["rsi_extreme_offset"]:
                  if diagnostics is not None: diagnostics["reason_skipped"] = f"rsi_not_extreme_short: {rsi}"
                  return None
             
             direction = "SHORT"
             stop_loss = current_price * (1 + self.params["max_dev_stop_pct"] / 100)
-            target = vwap
+            target = vwap * (1 - self.params["target_overshoot_pct"] / 100)
             
         else:
-            if rsi > self.params["rsi_extreme_long"]:
+            if rsi > 50 - self.params["rsi_extreme_offset"]:
                  if diagnostics is not None: diagnostics["reason_skipped"] = f"rsi_not_extreme_long: {rsi}"
                  return None
                  
             direction = "LONG"
             stop_loss = current_price * (1 - self.params["max_dev_stop_pct"] / 100)
-            target = vwap
+            target = vwap * (1 + self.params["target_overshoot_pct"] / 100)
 
         if diagnostics is not None:
             diagnostics["base_condition_met"] = True
@@ -118,7 +109,7 @@ class VWAPReversion(Strategy):
         current_time: str,
         current_price: float,
     ) -> ExitSignal:
-        """Exit at target (VWAP), stop, or time."""
+        """Exit at target (VWAP overshot), stop, or time."""
         direction = position.get("direction", "LONG")
         target = position.get("target", 0)
         stop_loss = position.get("stop_loss", 0)
