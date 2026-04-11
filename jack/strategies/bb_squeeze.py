@@ -64,7 +64,7 @@ class BBSqueezeBreakout(Strategy):
             if diagnostics is not None: diagnostics["reason_skipped"] = "missing_data"
             return None
 
-        # Check if in squeeze
+        # BB_Width_history is populated by the simulator from intraday 15m data
         bb_width_history = intraday_15m.get("BB_Width_history", [])
         if len(bb_width_history) < 5:
             if diagnostics is not None: diagnostics["reason_skipped"] = "insufficient_history"

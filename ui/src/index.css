@@ -1,0 +1,165 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base Styles ───────────────────────────────────────────────────────── */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: #030712;
+  color: #f3f4f6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Custom Scrollbar ──────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #111827;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4b5563;
+}
+
+/* ── Sidebar Day Items ─────────────────────────────────────────────────── */
+.day-item {
+  @apply px-3 py-2 cursor-pointer transition-all duration-150 text-sm
+         border-l-2 flex items-center justify-between;
+}
+
+.day-item:hover {
+  @apply bg-gray-800/60;
+}
+
+.day-item.selected {
+  @apply bg-gray-700/80;
+}
+
+.day-item.win {
+  @apply border-l-emerald-500;
+}
+
+.day-item.loss {
+  @apply border-l-red-500;
+}
+
+.day-item.no-trade {
+  @apply border-l-gray-600;
+}
+
+/* ── Tab Buttons ───────────────────────────────────────────────────────── */
+.tab-btn {
+  @apply px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-150
+         text-gray-400 hover:text-gray-200 hover:bg-gray-700/50;
+}
+
+.tab-btn.active {
+  @apply bg-gray-700 text-white;
+}
+
+/* ── Split Pill Buttons ────────────────────────────────────────────────── */
+.split-pill {
+  @apply px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-200
+         text-gray-400 hover:text-gray-200 cursor-pointer uppercase tracking-wider;
+}
+
+.split-pill.active {
+  @apply bg-blue-600 text-white shadow-lg shadow-blue-600/25;
+}
+
+/* ── Filter Bar ────────────────────────────────────────────────────────── */
+.filter-bar {
+  @apply h-2 rounded-full overflow-hidden;
+  background: #1f2937;
+}
+
+.filter-bar-fill {
+  @apply h-full rounded-full transition-all duration-500;
+}
+
+/* ── Severity Badges ───────────────────────────────────────────────────── */
+.severity-high {
+  @apply text-red-400 bg-red-500/10 border border-red-500/20;
+}
+
+.severity-medium {
+  @apply text-amber-400 bg-amber-500/10 border border-amber-500/20;
+}
+
+.severity-low {
+  @apply text-blue-400 bg-blue-500/10 border border-blue-500/20;
+}
+
+/* ── Animations ────────────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.loading-shimmer {
+  background: linear-gradient(90deg, #1f2937 25%, #374151 50%, #1f2937 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* ── Chart Container ───────────────────────────────────────────────────── */
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.phase-overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.08;
+  transition: opacity 0.2s;
+}
+
+/* ── Tooltip ───────────────────────────────────────────────────────────── */
+.tooltip {
+  @apply absolute z-50 px-3 py-2 text-xs rounded-lg bg-gray-800 border border-gray-700 shadow-xl;
+  pointer-events: none;
+}
+
+/* ── Spinner ───────────────────────────────────────────────────────────── */
+.spinner {
+  @apply inline-block w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Glassmorphism Panel ───────────────────────────────────────────────── */
+.glass-panel {
+  @apply bg-gray-800/60 backdrop-blur-sm border border-gray-700/50 rounded-xl;
+}
+
+/* ── Heatmap Cell ──────────────────────────────────────────────────────── */
+.heatmap-cell {
+  @apply w-4 h-4 rounded-sm cursor-pointer transition-transform duration-100;
+}
+
+.heatmap-cell:hover {
+  @apply scale-150 z-10;
+}

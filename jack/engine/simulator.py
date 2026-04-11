@@ -18,6 +18,7 @@ import yaml
 
 from data.loader import load_all_timeframes, get_daily_iterator, get_lookback
 from data.splits import DataSplits, validate_no_leakage
+from data.global_data import load_global_data, get_premarket_context
 from indicators.registry import IndicatorRegistry
 from engine.risk import RiskManager
 from engine.state_machine import StateMachine
@@ -77,6 +78,14 @@ class Simulator:
         self.risk_manager = RiskManager(config_path=config_path)
         self.state_machine = StateMachine()
 
+        # Load global pre-market data (gracefully — no crash if files missing)
+        try:
+            self._global_data = load_global_data(
+                os.path.join(self.base_dir, "data", "raw", "global")
+            )
+        except Exception:
+            self._global_data = {}
+
         # Initialize strategies
         self.strategies = {
             "first_hour_verdict": FirstHourVerdict(),
@@ -88,7 +97,21 @@ class Simulator:
             "theta_harvest": ThetaHarvest(),
         }
 
-        self.scorer = StrategyScorer(self.strategies)
+        # Load AI retrospective insight weights (if any saved insights exist)
+        try:
+            from brain.retrospective import get_scorer_adjustments
+            _knowledge_dir = os.path.join(self.base_dir, "brain", "knowledge")
+            insight_weights = get_scorer_adjustments(_knowledge_dir)
+            if insight_weights:
+                print(f"[Scorer] Loaded insight weights: {insight_weights}")
+        except Exception:
+            insight_weights = {}
+
+        self.scorer = StrategyScorer(
+            self.strategies,
+            min_score_threshold=0.4,
+            insight_weights=insight_weights,
+        )
         self.journal = JournalLogger(
             output_dir=os.path.join(self.base_dir, "journal", "logs")
         )
@@ -319,6 +342,23 @@ class Simulator:
                     f"DD: {dd['current_drawdown_pct']:.2f}%"
                 )
 
+        # Trigger AI retrospective after simulation completes
+        try:
+            from brain.retrospective import run_retrospective
+            journal_logs_dir = os.path.join(self.base_dir, "journal", "logs")
+            knowledge_dir = os.path.join(self.base_dir, "brain", "knowledge")
+            if verbose:
+                print("\n[Retrospective] Running AI retrospective on completed simulation...")
+            run_retrospective(
+                journal_logs_dir=journal_logs_dir,
+                knowledge_dir=knowledge_dir,
+                after_date=None,
+                before_date=measure_end,
+            )
+        except Exception as e:
+            if verbose:
+                print(f"  [WARN] AI retrospective skipped: {e}")
+
         # Compute final results
         results = self._compute_results(
             trade_log, equity_curve, total_days, no_trade_days,
@@ -529,6 +569,7 @@ class Simulator:
             },
             "capital": self.risk_manager.current_capital,
             "drawdown": self.risk_manager.get_drawdown(),
+            "global": get_premarket_context(date, self._global_data),
         }
 
     def _simulate_intraday(
@@ -677,6 +718,8 @@ class Simulator:
                 eligible = self.state_machine.get_eligible_strategies(time_str)
                 if not eligible:
                     continue
+                if "ALL" in eligible:
+                    eligible = list(self.strategies.keys())
 
                 # Get 5m indicators
                 inds_5m = self._get_5m_indicators_at_time(intraday_indicators_5m, time_str)
@@ -726,7 +769,8 @@ class Simulator:
                 # Compute 15m BB data for BB squeeze strategy
                 if "bb_squeeze" in eligible and not day_15m.empty:
                     try:
-                        bb_15m = self.indicator_registry.compute("bbands", day_15m, period=20)
+                        # Use period=10 so BB is valid by 12:15 (~13 candles in the day)
+                        bb_15m = self.indicator_registry.compute("bbands", day_15m, period=10)
                         current_bb = bb_15m[bb_15m["Time"] <= time_str]
                         if not current_bb.empty:
                             last = current_bb.iloc[-1]
@@ -781,6 +825,13 @@ class Simulator:
                 if not signals:
                     continue
 
+                # Adaptive Context Estimation
+                live_context = {
+                    "regime": indicators.get("Regime", "normal"),
+                    "gap_type": indicators.get("Gap_Type", "flat"),
+                    "time": time_str,
+                }
+                
                 # Score and select
                 selected = self.scorer.select_trade(signals, filters)
                 if selected is None:

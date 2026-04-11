@@ -22,16 +22,20 @@ class StrategyScorer:
     """
 
     def __init__(self, strategies: dict[str, Strategy],
-                 min_score_threshold: float = 0.5):
+                 min_score_threshold: float = 0.5,
+                 insight_weights: dict[str, float] = None):
         """
         Initialize scorer.
 
         Args:
             strategies: Dict mapping strategy name to Strategy instance.
             min_score_threshold: Minimum score to accept a signal.
+            insight_weights: Per-strategy multipliers from AI retrospective insights.
+                             0.0 = disabled, 1.0 = no change, 1.3 = 30% boost.
         """
         self.strategies = strategies
         self.min_score_threshold = min_score_threshold
+        self.insight_weights = insight_weights or {}
         self._decision_log: list[dict] = []
 
     def score_signals(
@@ -64,8 +68,13 @@ class StrategyScorer:
             if strategy is None:
                 continue
 
-            # Base score from strategy
-            base_score = strategy.score(signal, filters)
+            # Check if strategy is disabled by insight weights
+            insight_weight = self.insight_weights.get(signal.strategy_name, 1.0)
+            if insight_weight == 0.0:
+                continue  # Strategy disabled by AI retrospective
+
+            # Base score from strategy, scaled by insight weight
+            base_score = strategy.score(signal, filters) * insight_weight
 
             # Apply filter multipliers based on direction
             if signal.direction == "LONG":
