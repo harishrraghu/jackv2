@@ -1,0 +1,51 @@
+# Knowledge Base: Seasonal Patterns for BANKNIFTY
+# Last updated: 2026-04-14
+# Source: Tier 1 + Tier 3 (own data + market knowledge)
+# Confidence: MEDIUM
+
+seasonal:
+  budget_week:
+    description: "Union Budget week — extreme volatility expected"
+    action: "Reduce position size by 50-75%"
+    size_multiplier: 0.3
+    notes:
+      - "Historical VIX spikes 30-50% in budget week"
+      - "Post-budget day can gap 2-5%"
+      - "No overnight positions day before budget"
+    confidence: 0.85
+
+  rbi_policy:
+    description: "RBI monetary policy announcement"
+    action: "No new trades 30 min before and after announcement"
+    timing: "Usually 10:00 AM"
+    notes:
+      - "Rate cut → bullish for banking"
+      - "Rate hike → bearish for banking"
+      - "Status quo → depends on commentary"
+      - "Wait for reaction, then trade the trend"
+    confidence: 0.80
+
+  election_period:
+    description: "General elections or state elections with market impact"
+    action: "Reduce size by 50%. No overnight positions."
+    notes:
+      - "Exit results can cause 3-5% gaps"
+      - "VIX usually elevated during election week"
+    confidence: 0.75
+
+  quarter_end:
+    description: "Last week of March, June, September, December"
+    action: "Watch for FII rebalancing flows"
+    notes:
+      - "Institutional rebalancing creates unusual moves"
+      - "March end: FY-end tax selling"
+      - "December end: Holiday-thin volume"
+    confidence: 0.60
+
+  earnings_season:
+    description: "Banking sector quarterly results (Jan, Apr, Jul, Oct)"
+    action: "Individual stock results can move BANKNIFTY 1-2%"
+    notes:
+      - "HDFC Bank results = biggest single-stock impact"
+      - "Trade FHV day after major bank results"
+    confidence: 0.65

@@ -1,0 +1,93 @@
+# Active Strategies for BANKNIFTY
+# The Trader agent reads this to know what tools it has
+# Last updated: 2026-04-14
+
+strategies:
+  first_hour_verdict:
+    module: "strategies.first_hour_verdict"
+    class: "FirstHourVerdict"
+    status: active
+    win_rate: 0.68
+    avg_rr: 1.8
+    best_conditions:
+      - "gap < 0.3%"
+      - "Monday, Wednesday, Friday"
+      - "RSI between 40-60 (not extreme)"
+    avoid_conditions:
+      - "Expiry day morning (use after 11:00 only)"
+      - "VIX > 25 (reduce size)"
+      - "ADX < 15 (choppy, low edge)"
+    time_window: "10:15 - 15:00"
+    notes: "Primary strategy. Highest edge. Proven across 2300+ days."
+    confidence: 0.80
+
+  gap_fill:
+    module: "strategies.gap_fill"
+    class: "GapFill"
+    status: active
+    win_rate: 0.63
+    avg_rr: 1.5
+    best_conditions:
+      - "Gap between 0.1% and 0.5%"
+      - "PCR between 0.8 and 1.3"
+      - "Not on strong trending days (ADX < 30)"
+    avoid_conditions:
+      - "Gap > 0.75% on Monday"
+      - "Strong ADX (> 35)"
+    time_window: "09:30 - 10:15"
+    notes: "Strong edge on small gaps. Quick fill trades."
+    confidence: 0.72
+
+  bb_squeeze:
+    module: "strategies.bb_squeeze"
+    class: "BBSqueezeBreakout"
+    status: active
+    win_rate: 0.58
+    avg_rr: 2.0
+    best_conditions:
+      - "BB Width < 2%"
+      - "Squeeze lasted > 3 candles"
+      - "ADX rising from low levels"
+    time_window: "11:15 - 15:00"
+    notes: "Lower frequency but good R:R. Works well in dead zone."
+    confidence: 0.65
+
+  vwap_reversion:
+    module: "strategies.vwap_reversion"
+    class: "VWAPReversion"
+    status: active
+    win_rate: 0.60
+    avg_rr: 1.3
+    best_conditions:
+      - "Range-bound market (ADX < 20)"
+      - "Price > 1 ATR from VWAP"
+    time_window: "11:15 - 15:00"
+    notes: "Mean reversion plays. Quick scalps in dead zone."
+    confidence: 0.62
+
+  gap_up_fade:
+    module: "strategies.gap_up_fade"
+    class: "GapUpFade"
+    status: active
+    win_rate: 0.55
+    avg_rr: 1.6
+    best_conditions:
+      - "Large gap up (> 0.5%)"
+      - "Weak opening after gap"
+    time_window: "09:30 - 10:15"
+    notes: "Fading large gaps. Higher risk but good R:R."
+    confidence: 0.58
+
+  afternoon_breakout:
+    module: "strategies.afternoon_breakout"
+    class: "AfternoonBreakout"
+    status: active
+    win_rate: 0.56
+    avg_rr: 1.7
+    best_conditions:
+      - "Range consolidation in dead zone"
+      - "ADX rising"
+      - "Volume pick up after 13:15"
+    time_window: "13:15 - 15:00"
+    notes: "Afternoon continuation trades."
+    confidence: 0.60

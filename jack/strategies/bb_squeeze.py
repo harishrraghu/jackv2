@@ -24,9 +24,9 @@ class BBSqueezeBreakout(Strategy):
 
     def __init__(self, params: dict = None):
         default_params = {
-            "squeeze_threshold_pct": 25,
-            "atr_target_multiplier": 1.0,
-            "max_candles_to_confirm": 3,
+            "squeeze_threshold_pct": 15,       # Tighter squeeze required (was 25)
+            "atr_target_multiplier": 1.5,       # Larger target for better R:R (was 1.0)
+            "max_candles_to_confirm": 2,        # Exit false breakouts faster (was 3)
             "prefer_long": True,
         }
         if params:
@@ -129,6 +129,7 @@ class BBSqueezeBreakout(Strategy):
                 "bb_lower": bb_lower,
                 "atr": atr,
                 "candles_since_breakout": 0,
+                "risk_multiplier": 0.1,  # Minimal size — many false breakouts in trending market
             },
         )
 
@@ -150,8 +151,8 @@ class BBSqueezeBreakout(Strategy):
         max_candles = self.params["max_candles_to_confirm"]
         candles_elapsed = position.get("metadata", {}).get("candles_since_breakout", 0)
 
-        # Time exit
-        if current_time >= "15:15":
+        # Time exit — don't hold a squeeze breakout through close
+        if current_time >= "14:45":
             return ExitSignal(
                 should_exit=True,
                 exit_price=current_price,

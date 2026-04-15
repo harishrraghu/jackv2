@@ -347,7 +347,7 @@ class PerformanceAnalyzer:
 
         print(f"\n  Total Trades: {r['total_trades']}")
         print(f"  Win Rate: {r['win_rate_pct']}%")
-        print(f"  Net P&L: ₹{r['total_return_abs']:,.2f}")
+        print(f"  Net P&L: Rs{r['total_return_abs']:,.2f}")
         print(f"  Return: {r['total_return_pct']}%")
         print(f"  Sharpe (Monthly - Use This): {r['sharpe_monthly']}")
         print(f"  Sharpe (Trade Days Only): {r['sharpe_trade_days']}")
@@ -357,7 +357,7 @@ class PerformanceAnalyzer:
         print(f"  Recovery Factor: {r.get('recovery_factor', 0)}")
         print(f"  Max DD: {r['max_drawdown_pct']}%")
         print(f"  Profit Factor: {r['profit_factor']}")
-        print(f"  Expectancy: ₹{r['expectancy']:,.2f}")
+        print(f"  Expectancy: Rs{r['expectancy']:,.2f}")
 
         # Strategy breakdown
         if r.get("by_strategy"):
@@ -366,7 +366,7 @@ class PerformanceAnalyzer:
             for s, data in r["by_strategy"].items():
                 rows.append([
                     s, data["trades"], f"{data['win_rate_pct']}%",
-                    f"₹{data['net_pnl']:,.0f}", data.get("profit_factor", "N/A"),
+                    f"Rs{data['net_pnl']:,.0f}", data.get("profit_factor", "N/A"),
                 ])
             print(tabulate(rows,
                            headers=["Strategy", "Trades", "Win%", "Net P&L", "PF"],
@@ -380,7 +380,7 @@ class PerformanceAnalyzer:
                 if day in r["by_day"]:
                     d = r["by_day"][day]
                     rows.append([day, d["trade_count"], f"{d['win_rate']}%",
-                                 f"₹{d['net_pnl']:,.0f}"])
+                                 f"Rs{d['net_pnl']:,.0f}"])
             print(tabulate(rows,
                            headers=["Day", "Trades", "Win%", "Net P&L"],
                            tablefmt="simple"))

@@ -1,0 +1,40 @@
+# Circuit Breakers — Hard stops that override EVERYTHING
+# These are non-negotiable safety rules
+# Last updated: 2026-04-14
+
+circuit_breakers:
+  daily_loss_limit:
+    threshold_pct: 2.0
+    action: "STOP_TRADING"
+    description: "If daily P&L drops below -2% of capital, stop all trading for the day"
+    override_allowed: false
+
+  drawdown_limit:
+    threshold_pct: 25.0
+    action: "STOP_SYSTEM"
+    description: "If total drawdown exceeds 25%, halt the entire system for review"
+    override_allowed: false
+
+  consecutive_losses:
+    threshold: 5
+    action: "REDUCE_SIZE"
+    size_multiplier: 0.3
+    description: "After 5 consecutive losing trades, reduce size to 30%"
+    reset_on: "2 consecutive wins"
+
+  vix_extreme:
+    threshold: 35
+    action: "NO_NEW_TRADES"
+    description: "If India VIX > 35, do not take any new trades"
+    override_allowed: false
+
+  gap_extreme:
+    threshold_pct: 3.0
+    action: "OBSERVE_ONLY"
+    description: "If gap > 3%, only observe. Do not trade first hour."
+    resume_after: "10:30"
+
+  position_size_hard_cap:
+    max_lots: 10
+    description: "Never take more than 10 lots regardless of capital"
+    override_allowed: false

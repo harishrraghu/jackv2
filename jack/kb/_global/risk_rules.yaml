@@ -1,0 +1,16 @@
+# Global Risk Rules — Apply across all markets
+# Last updated: 2026-04-14
+
+global_risk:
+  max_portfolio_exposure_pct: 5.0    # Max 5% of total capital at risk
+  correlation_limit: "Never trade same direction on correlated instruments"
+  
+  force_exit_rules:
+    - "Exit all positions by 15:15 IST"
+    - "No overnight positions ever"
+    - "If total unrealized loss > 1.5% of capital, exit worst position"
+
+  system_health:
+    min_win_rate_rolling_30: 0.45    # If 30-day win rate < 45%, pause
+    max_consecutive_losses: 7         # Pause after 7 consecutive losses
+    review_trigger: "weekly"          # Weekly performance review by Learner

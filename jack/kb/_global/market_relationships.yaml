@@ -1,0 +1,33 @@
+# Global Market Relationships
+# Last updated: 2026-04-14
+
+relationships:
+  us_markets:
+    sp500:
+      correlation: "moderate_positive"
+      impact: "Overnight S&P 500 change predicts BANKNIFTY gap direction 65% of the time"
+      threshold: "When S&P falls > 2%, expect BANKNIFTY gap down > 0.5%"
+      confidence: 0.65
+    
+    nasdaq:
+      correlation: "weak_positive"
+      notes: "Less correlated than S&P, but tech selloffs can drag banking"
+      confidence: 0.55
+
+  global:
+    dxy:
+      correlation: "weak_negative"
+      notes: "Strong dollar tends to be mildly negative for Indian markets"
+      confidence: 0.55
+    
+    crude_oil:
+      correlation: "weak_negative"
+      notes: "Oil price spikes negative for Indian markets, but limited banking impact"
+      confidence: 0.50
+
+  domestic:
+    nifty50:
+      correlation: "strong_positive"
+      notes: "BANKNIFTY and NIFTY50 move together 85% of the time"
+      deviation: "BANKNIFTY has higher beta — moves faster and further"
+      confidence: 0.85

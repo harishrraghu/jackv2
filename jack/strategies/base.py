@@ -170,17 +170,29 @@ class PositionManager:
             return ExitSignal(True, current_price, "partial_exit", partial_pct=0.5)
             
         # 3. Adjust targets based on day type
+        # Use original_direction stored at entry to prevent dict-mutation bugs
+        orig_direction = meta.get("original_direction", direction)
         if "adaptive_applied" not in meta:
-            if day_type == "range":
-                if direction == "LONG":
-                    position["target"] -= 0.3 * attr
-                else:
-                    position["target"] += 0.3 * attr
-            elif day_type in ("trend_up", "trend_down"):
-                if direction == "LONG":
-                    position["target"] += 0.5 * attr
-                else:
-                    position["target"] -= 0.5 * attr
+            # Sanity-check: target must exist and be a real price
+            existing_target = position.get("target", 0)
+            if existing_target and existing_target > 0:
+                if day_type == "range":
+                    if orig_direction == "LONG":
+                        position["target"] = existing_target - 0.3 * attr
+                    else:
+                        position["target"] = existing_target + 0.3 * attr
+                elif day_type in ("trend_up", "trend_down"):
+                    if orig_direction == "LONG":
+                        position["target"] = existing_target + 0.5 * attr
+                    else:
+                        position["target"] = existing_target - 0.5 * attr
+                # Validate target makes sense for direction
+                entry_p = position["entry_price"]
+                new_target = position["target"]
+                if orig_direction == "LONG" and new_target <= entry_p:
+                    position["target"] = existing_target  # Revert invalid
+                elif orig_direction == "SHORT" and new_target >= entry_p:
+                    position["target"] = existing_target  # Revert invalid
             meta["adaptive_applied"] = True
             
         return None

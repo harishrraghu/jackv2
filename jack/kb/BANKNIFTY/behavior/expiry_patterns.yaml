@@ -1,0 +1,35 @@
+# Knowledge Base: Expiry Day Patterns for BANKNIFTY
+# Last updated: 2026-04-14
+# Source: Tier 1 (own data analysis)
+# Confidence: MEDIUM-HIGH
+
+expiry_day:
+  general:
+    description: "Weekly expiry is Wednesday. Monthly expiry is last Thursday."
+    behavior: "High theta decay, pinning near max pain, whipsaw common"
+    reduce_size: true
+    size_multiplier: 0.7  # Use 70% of normal position size
+    confidence: 0.72
+
+  max_pain_pull:
+    description: "On expiry days, spot gravitates toward max pain strike"
+    strongest_after: "14:00"
+    strongest_when:
+      - "Spot is 100-300 pts away from max pain"
+      - "VIX > 15"
+      - "No strong directional OI buildup"
+    probability: 0.65
+    validated_on: "Limited — needs more OI data"
+    confidence: 0.60
+
+  theta_decay:
+    description: "Option premiums collapse fastest on expiry day afternoon"
+    peak_decay_window: "14:00 - 15:00"
+    strategy_hint: "Selling OTM options after 2pm on expiry can capture theta"
+    risk: "Sudden gamma spikes can cause outsized losses"
+    confidence: 0.70
+
+  avoid_patterns:
+    - "Don't take breakout trades after 14:00 on expiry — too much pinning"
+    - "Don't buy deep OTM options on expiry day"
+    - "Reduce position size by 30% minimum"

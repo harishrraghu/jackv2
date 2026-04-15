@@ -46,7 +46,7 @@ class GapUpFade(Strategy):
         Check entry for gap-up fade.
 
         Requires: gap > 0.5% AND bearish first 15m candle.
-        If both first two 15m candles are bullish → NO TRADE (breakaway gap).
+        If both first two 15m candles are bullish -> NO TRADE (breakaway gap).
         """
         gap = indicators.get("gap", {})
         orb = indicators.get("orb", {})

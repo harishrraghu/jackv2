@@ -107,7 +107,7 @@ class PostTradeAnalyzer:
                 what_worked.append("Time exit was optimal — price deteriorated after exit")
             else:
                 what_failed.append(
-                    f"Time exit left ₹{if_held_to_close_pnl - net_pnl:,.0f} on the table"
+                    f"Time exit left Rs{if_held_to_close_pnl - net_pnl:,.0f} on the table"
                 )
 
         if exit_reason == "stop_hit":

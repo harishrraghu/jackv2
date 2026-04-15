@@ -201,8 +201,8 @@ class JournalAnalyzer:
 
             if recent_avg < older_avg * 0.5:
                 warnings.append(
-                    f"AVG P&L DEGRADING: Recent avg ₹{recent_avg:,.0f} "
-                    f"vs historical avg ₹{older_avg:,.0f}"
+                    f"AVG P&L DEGRADING: Recent avg Rs{recent_avg:,.0f} "
+                    f"vs historical avg Rs{older_avg:,.0f}"
                 )
 
         if not warnings:
@@ -244,7 +244,7 @@ class JournalAnalyzer:
             if stats["trades"] >= 5 and stats["avg_pnl"] < -5000:
                 recommendations.append(
                     f"The '{regime}' regime is losing money "
-                    f"(avg ₹{stats['avg_pnl']:,.0f}/trade). "
+                    f"(avg Rs{stats['avg_pnl']:,.0f}/trade). "
                     f"Consider blocking trades in this regime."
                 )
 

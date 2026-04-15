@@ -53,7 +53,7 @@ def main():
     metrics = [
         ("Total Trades", "total_trades", "d"),
         ("Win Rate (%)", "win_rate", ".1f"),
-        ("Net P&L (₹)", "net_pnl", ",.0f"),
+        ("Net P&L (Rs)", "net_pnl", ",.0f"),
         ("Return (%)", "return_pct", ".2f"),
         ("Max Drawdown (%)", "max_drawdown_pct", ".2f"),
         ("Sharpe Ratio", "sharpe_ratio", ".3f"),
@@ -84,7 +84,7 @@ def main():
         fhv = res.get("by_strategy", {}).get("first_hour_verdict", {})
         print(f"    {variant_name}: {fhv.get('trades', 0)} trades, "
               f"WR: {fhv.get('win_rate', 0):.1f}%, "
-              f"P&L: ₹{fhv.get('pnl', 0):+,.0f}")
+              f"P&L: Rs{fhv.get('pnl', 0):+,.0f}")
 
     # Verdict
     pnl_a = results_a.get("net_pnl", 0)

@@ -82,9 +82,9 @@ def volatility_filter(current_atr: float, avg_atr_60d: float) -> dict:
     """
     Volatility regime filter.
 
-    atr_ratio < 0.7 → "contracting", smaller positions
-    atr_ratio > 1.3 → "expanding", wider stops eat risk budget
-    else → "normal"
+    atr_ratio < 0.7 -> "contracting", smaller positions
+    atr_ratio > 1.3 -> "expanding", wider stops eat risk budget
+    else -> "normal"
 
     Returns:
         Dict with regime classification and multiplier.

@@ -1,0 +1,13 @@
+# Rejected Sources/Claims — failed validation
+# Last updated: 2026-04-14
+rejected: []
+
+# Format:
+# - source_id: "src_YYYYMMDD_NNN"
+#   claim: "What was claimed"
+#   rejection_reason: "Why it failed validation"
+#   test_results:
+#     win_rate: 0.xx
+#     sample_size: N
+#     period: "YYYY-YYYY"
+#   rejected_date: "YYYY-MM-DD"

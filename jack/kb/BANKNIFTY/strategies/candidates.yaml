@@ -1,0 +1,15 @@
+# Candidate Strategies — Being tested, not yet active
+# Last updated: 2026-04-14
+candidates: {}
+
+# Strategies moved here after Builder creates them and Charting validates
+# Format:
+#   strategy_name:
+#     module: "strategies.xxx"
+#     backtest_results:
+#       win_rate: 0.xx
+#       sharpe: x.x
+#       period: "YYYY-MM to YYYY-MM"
+#     status: "paper_testing"
+#     created_by: "builder"
+#     created_date: "YYYY-MM-DD"

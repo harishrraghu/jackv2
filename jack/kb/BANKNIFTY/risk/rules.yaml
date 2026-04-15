@@ -1,0 +1,48 @@
+# Knowledge Base: Risk Rules for BANKNIFTY
+# Last updated: 2026-04-14
+# THESE ARE SACROSANCT — AI cannot override these
+
+position_sizing:
+  base_risk_per_trade_pct: 0.5    # Max 0.5% of capital per trade
+  max_daily_drawdown_pct: 2.0     # Stop trading if daily loss > 2%
+  max_total_drawdown_pct: 25.0    # Hard stop — review entire system
+  max_trades_per_day: 2           # No more than 2 trades per day
+  max_open_positions: 1           # Only 1 position at a time
+
+  # Position size adjustments by regime
+  regime_multipliers:
+    trending_strong: 1.0
+    trending_weak: 0.8
+    range_bound: 0.7
+    volatile: 0.5
+    squeeze: 0.6
+
+  # Position size adjustments by VIX
+  vix_multipliers:
+    low: 1.1        # VIX < 12
+    normal: 1.0      # VIX 12-20
+    elevated: 0.7    # VIX 20-25
+    high: 0.5        # VIX 25-30
+    extreme: 0.3     # VIX > 30
+
+stops:
+  hard_stop_atr_multiple: 1.5     # Hard SL at 1.5 ATR from entry
+  trailing_activation: 0.5        # Start trailing after 0.5 ATR profit
+  breakeven_trigger: 0.5          # Move SL to breakeven at 0.5 ATR profit
+  partial_exit_trigger: 1.0       # Take 50% off at 1.0 ATR profit
+
+cost_model:
+  brokerage_pct: 0.03
+  stt_sell_pct: 0.0125            # Futures STT rate
+  slippage_ticks: 1
+  tick_size: 0.05
+
+entry_rules:
+  min_conviction: 0.15            # Minimum confluence score
+  earliest_entry: "09:30"
+  latest_entry: "14:30"
+  no_entry_after_loss: false      # Can re-enter after a loss (but daily limit applies)
+
+exit_rules:
+  must_exit_by: "15:15"           # All positions must be closed
+  no_overnight: true              # Never hold overnight

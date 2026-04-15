@@ -1,0 +1,63 @@
+# Knowledge Base: Day-of-Week Patterns for BANKNIFTY
+# Last updated: 2026-04-14
+# Source: Tier 1 (own backtest data)
+# Confidence: MEDIUM
+
+day_of_week:
+  Monday:
+    win_rate: 0.58
+    avg_range_pct: 0.95
+    bias: "neutral_bullish"
+    notes:
+      - "Monday tends to continue Friday's direction if gap < 0.3%"
+      - "Large Monday gaps (>0.5%) often reverse"
+      - "Good for gap_fill strategy"
+    best_strategies: ["gap_fill", "first_hour_verdict"]
+    confidence: 0.65
+
+  Tuesday:
+    win_rate: 0.52
+    avg_range_pct: 0.85
+    bias: "neutral"
+    notes:
+      - "Historically the weakest day for directional trades"
+      - "Better for range-bound strategies"
+      - "VIX tends to be stable"
+    best_strategies: ["vwap_reversion", "bb_squeeze"]
+    confidence: 0.60
+
+  Wednesday:
+    win_rate: 0.55
+    avg_range_pct: 1.10
+    bias: "volatile"
+    notes:
+      - "Weekly expiry day — higher volatility"
+      - "Theta decay strategies work well afternoon"
+      - "Max pain pull strongest after 2pm"
+      - "Reduce position size by 30%"
+    best_strategies: ["first_hour_verdict"]
+    avoid: "breakout after 14:00"
+    confidence: 0.70
+
+  Thursday:
+    win_rate: 0.56
+    avg_range_pct: 0.90
+    bias: "neutral"
+    notes:
+      - "Post-expiry day — often quieter"
+      - "Good for trend continuation"
+    best_strategies: ["first_hour_verdict", "afternoon_breakout"]
+    confidence: 0.62
+
+  Friday:
+    win_rate: 0.54
+    avg_range_pct: 0.80
+    bias: "neutral_cautious"
+    notes:
+      - "Weekend risk — traders reduce positions"
+      - "Often starts with gap based on global cues"
+      - "Afternoon tends to be quiet"
+      - "Last hour can see short covering"
+    best_strategies: ["gap_fill", "first_hour_verdict"]
+    latest_entry: "13:30"  # Don't enter after 1:30 on Fridays
+    confidence: 0.60

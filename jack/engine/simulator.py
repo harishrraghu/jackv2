@@ -7,6 +7,7 @@ state machine, and journal logging into a deterministic day-by-day simulation.
 ZERO LLM calls. Pure deterministic Python.
 """
 
+import logging
 import os
 import sys
 import math
@@ -15,6 +16,8 @@ from typing import Optional
 import pandas as pd
 import numpy as np
 import yaml
+
+logger = logging.getLogger(__name__)
 
 from data.loader import load_all_timeframes, get_daily_iterator, get_lookback
 from data.splits import DataSplits, validate_no_leakage
@@ -34,6 +37,10 @@ from strategies.bb_squeeze import BBSqueezeBreakout
 from strategies.gap_up_fade import GapUpFade
 from strategies.vwap_reversion import VWAPReversion
 from strategies.afternoon_breakout import AfternoonBreakout
+from strategies.iv_expansion_ride import IVExpansionRide
+from strategies.oi_confirmed_breakout import OIConfirmedBreakout
+from strategies.delta_scalp import DeltaScalp
+from strategies.oi_wall_bounce import OIWallBounce
 from strategies.base import PositionManager
 
 # Import single-day indicator functions
@@ -94,22 +101,29 @@ class Simulator:
             "gap_up_fade": GapUpFade(),
             "vwap_reversion": VWAPReversion(),
             "afternoon_breakout": AfternoonBreakout(),
+            "iv_expansion_ride": IVExpansionRide(),
+            "oi_confirmed_breakout": OIConfirmedBreakout(),
+            "delta_scalp": DeltaScalp(),
+            "oi_wall_bounce": OIWallBounce(),
         }
 
-        # Load AI retrospective insight weights (if any saved insights exist)
+        # Initialize Core Option Brain
+        from brain.core import IntelligentBrain
+        self.brain = IntelligentBrain()
+
+        # Initialize historical options loader (no crash if data not yet fetched)
         try:
-            from brain.retrospective import get_scorer_adjustments
-            _knowledge_dir = os.path.join(self.base_dir, "brain", "knowledge")
-            insight_weights = get_scorer_adjustments(_knowledge_dir)
-            if insight_weights:
-                print(f"[Scorer] Loaded insight weights: {insight_weights}")
+            from data.options_loader import OptionsLoader
+            self._options_loader = OptionsLoader(
+                os.path.join(self.base_dir, "data", "options")
+            )
         except Exception:
-            insight_weights = {}
+            self._options_loader = None
 
         self.scorer = StrategyScorer(
             self.strategies,
             min_score_threshold=0.4,
-            insight_weights=insight_weights,
+            insight_weights={},
         )
         self.journal = JournalLogger(
             output_dir=os.path.join(self.base_dir, "journal", "logs")
@@ -149,8 +163,8 @@ class Simulator:
         accessible_start, accessible_end = self.splits.get_accessible_range(split)
 
         if verbose:
-            print(f"\nAccessible data: {accessible_start} → {accessible_end}")
-            print(f"Measurement period: {measure_start} → {measure_end}")
+            print(f"\nAccessible data: {accessible_start} -> {accessible_end}")
+            print(f"Measurement period: {measure_start} -> {measure_end}")
 
         # Pre-compute daily indicators on accessible data
         daily = data.get("1d", pd.DataFrame())
@@ -197,7 +211,7 @@ class Simulator:
 
         # Get daily iterator for measurement period
         if verbose:
-            print(f"\nSimulating {measure_start} → {measure_end}...\n")
+            print(f"\nSimulating {measure_start} -> {measure_end}...\n")
 
         for day_data in get_daily_iterator(data, measure_start, measure_end):
             total_days += 1
@@ -229,7 +243,7 @@ class Simulator:
                     validate_no_leakage(split, lookback_dates, splits=self.splits)
             except Exception as e:
                 if verbose:
-                    print(f"  ⚠ Data leakage check: {e}")
+                    print(f"  [!] Data leakage check: {e}")
                 continue
 
             # Get today's indicator values from pre-computed data
@@ -237,14 +251,46 @@ class Simulator:
                 daily_with_indicators, date, lookback
             )
 
+            # Load historical options data for this day (if available)
+            date_str = date.strftime("%Y-%m-%d") if hasattr(date, "strftime") else str(date)
+            spot_price = today_indicators.get("Open", today_indicators.get("Close", 0))
+            options_context = self._load_options_context(date_str, spot=spot_price)
+
+            # Merge options data into indicators for downstream use
+            if options_context:
+                today_indicators["PCR"] = (options_context.get("pcr") or {}).get("pcr")
+                today_indicators["MaxPain"] = (options_context.get("max_pain") or {}).get("max_pain")
+                today_indicators["ATM_IV"] = options_context.get("atm_iv")
+                today_indicators["IV_Regime"] = options_context.get("iv_regime")
+                today_indicators["DTE"] = options_context.get("days_to_expiry")
+
             # Compute intraday indicators
             orb_data = orb_single_day(day_data.get("15m", pd.DataFrame()))
             fh_data = fh_single_day(day_data.get("1h", pd.DataFrame()))
 
             # Build morning briefing
             briefing = self._build_briefing(
-                date, today_indicators, orb_data, fh_data, lookback
+                date, today_indicators, orb_data, fh_data, lookback,
+                options_context=options_context,
             )
+
+            # --- BRAIN: Invoke Options Core ---
+            lookback_1d = lookback.get("1d", pd.DataFrame())
+            lookback_5d = lookback_1d.tail(5) if not lookback_1d.empty else pd.DataFrame()
+            brain_ctx = {
+                "india_vix": briefing["global"].get("india_vix") if briefing.get("global") else None,
+                "gap_pct": today_indicators.get("Gap_Pct", 0.0),
+                "pcr": today_indicators.get("PCR", (briefing.get("pcr") or {}).get("pcr")),
+                "max_pain": briefing.get("max_pain", {}),
+                "atm_iv": today_indicators.get("ATM_IV", briefing.get("atm_iv")),
+                "iv_regime": today_indicators.get("IV_Regime", briefing.get("iv_regime", "normal_iv")),
+                "dte": today_indicators.get("DTE", briefing.get("days_to_expiry")),
+                "oi_buildup": briefing.get("oi_buildup", {}),
+                "oi_levels": briefing.get("oi_levels", {}),
+            }
+            morning_thesis = self.brain.generate_morning_thesis(brain_ctx, lookback_5d)
+            self.scorer.insight_weights = morning_thesis["recommended_weights"]
+            briefing["morning_thesis"] = morning_thesis
 
             # Run filter stack
             filters = run_filter_stack(
@@ -338,7 +384,7 @@ class Simulator:
                 dd = self.risk_manager.get_drawdown()
                 print(
                     f"  Day {total_days}: {date.strftime('%Y-%m-%d') if hasattr(date, 'strftime') else date} | "
-                    f"Capital: ₹{cap:,.0f} | Trades: {len(trade_log)} | "
+                    f"Capital: Rs{cap:,.0f} | Trades: {len(trade_log)} | "
                     f"DD: {dd['current_drawdown_pct']:.2f}%"
                 )
 
@@ -411,9 +457,20 @@ class Simulator:
 
         # Compute daily indicators
         daily_with_indicators = self._compute_daily_indicators(combined_daily)
-        
+
         # Get today's indicator values (the last row)
         today_indicators = self._get_today_indicators(daily_with_indicators, date, lookback)
+
+        # Load historical options context
+        date_str = date.strftime("%Y-%m-%d") if hasattr(date, "strftime") else str(date)
+        spot_price = today_indicators.get("Open", today_indicators.get("Close", 0))
+        options_context = self._load_options_context(date_str, spot=spot_price)
+        if options_context:
+            today_indicators["PCR"] = (options_context.get("pcr") or {}).get("pcr")
+            today_indicators["MaxPain"] = (options_context.get("max_pain") or {}).get("max_pain")
+            today_indicators["ATM_IV"] = options_context.get("atm_iv")
+            today_indicators["IV_Regime"] = options_context.get("iv_regime")
+            today_indicators["DTE"] = options_context.get("days_to_expiry")
 
         # Compute intraday indicators
         orb_data = orb_single_day(day_data.get("15m", pd.DataFrame()))
@@ -421,8 +478,27 @@ class Simulator:
 
         # Build morning briefing
         briefing = self._build_briefing(
-            date, today_indicators, orb_data, fh_data, lookback
+            date, today_indicators, orb_data, fh_data, lookback,
+            options_context=options_context,
         )
+
+        # --- BRAIN: Invoke Options Core ---
+        lookback_1d = lookback.get("1d", pd.DataFrame())
+        lookback_5d = lookback_1d.tail(5) if not lookback_1d.empty else pd.DataFrame()
+        brain_ctx_sd = {
+            "india_vix": briefing["global"].get("india_vix") if briefing.get("global") else None,
+            "gap_pct": today_indicators.get("Gap_Pct", 0.0),
+            "pcr": today_indicators.get("PCR", (briefing.get("pcr") or {}).get("pcr")),
+            "max_pain": briefing.get("max_pain", {}),
+            "atm_iv": today_indicators.get("ATM_IV", briefing.get("atm_iv")),
+            "iv_regime": today_indicators.get("IV_Regime", briefing.get("iv_regime", "normal_iv")),
+            "dte": today_indicators.get("DTE", briefing.get("days_to_expiry")),
+            "oi_buildup": briefing.get("oi_buildup", {}),
+            "oi_levels": briefing.get("oi_levels", {}),
+        }
+        morning_thesis = self.brain.generate_morning_thesis(brain_ctx_sd, lookback_5d)
+        self.scorer.insight_weights = morning_thesis["recommended_weights"]
+        briefing["morning_thesis"] = morning_thesis
 
         # Run filter stack
         filters = run_filter_stack(
@@ -434,13 +510,13 @@ class Simulator:
             },
             indicators={
                 "RSI": today_indicators.get("RSI"),
-                "hourly_RSI": None, # Will be computed locally if needed
+                "hourly_RSI": None,
                 "ATR": today_indicators.get("ATR"),
                 "Regime": today_indicators.get("Regime", "normal"),
             },
         )
         briefing["filters"] = filters
-        
+
         if briefing_only:
             return {"date": date, "briefing": briefing}
 
@@ -538,10 +614,24 @@ class Simulator:
 
         return result
 
+    def _load_options_context(self, date_str: str, spot: float = None) -> dict:
+        """Load historical options context for a backtest date. Returns {} if unavailable."""
+        if self._options_loader is None:
+            return {}
+        try:
+            return self._options_loader.build_options_context(
+                date_str, time_str="09:30", spot=spot
+            )
+        except Exception as e:
+            logger.debug(f"Options context failed for {date_str}: {e}")
+            return {}
+
     def _build_briefing(
         self, date, indicators, orb_data, fh_data, lookback,
+        options_context: dict = None,
     ) -> dict:
         """Build the morning briefing dict."""
+        opts = options_context or {}
         return {
             "date": date,
             "day_of_week": date.day_name() if hasattr(date, 'day_name') else "",
@@ -567,6 +657,16 @@ class Simulator:
                 "bull": indicators.get("Bull_Streak", 0),
                 "bear": indicators.get("Bear_Streak", 0),
             },
+            # Options data — populated when historical options parquet exists, otherwise empty
+            "pcr": opts.get("pcr", {}),
+            "max_pain": opts.get("max_pain", {}),
+            "oi_buildup": opts.get("oi_buildup", {}),
+            "oi_levels": opts.get("oi_levels", {}),
+            "iv_data": opts.get("iv_data", {}),
+            "atm_iv": opts.get("atm_iv"),
+            "iv_regime": opts.get("iv_regime", "normal_iv"),
+            "days_to_expiry": opts.get("days_to_expiry"),
+            "option_chain": opts.get("option_chain"),
             "capital": self.risk_manager.current_capital,
             "drawdown": self.risk_manager.get_drawdown(),
             "global": get_premarket_context(date, self._global_data),
@@ -650,7 +750,7 @@ class Simulator:
                             f"{time_str} EXIT [{result['strategy']}] "
                             f"{result['direction']} "
                             f"@ {result['exit_price']:.1f} "
-                            f"→ {color}₹{pnl:+,.0f}\033[0m "
+                            f"-> {color}Rs{pnl:+,.0f}\033[0m "
                             f"({result['exit_reason']})"
                         )
                 continue
@@ -687,7 +787,7 @@ class Simulator:
                                 f"{time_str} EXIT [{result['strategy']}] "
                                 f"{result['direction']} "
                                 f"@ {result['exit_price']:.1f} "
-                                f"→ {color}₹{pnl:+,.0f}\033[0m "
+                                f"-> {color}Rs{pnl:+,.0f}\033[0m "
                                 f"({result['exit_reason']})"
                             )
                         continue
@@ -726,8 +826,13 @@ class Simulator:
                                           f"{time_str} PARTIAL EXIT [{result['strategy']}] "
                                           f"{result['direction']} "
                                           f"@ {result['exit_price']:.1f} ({exit_qty} units) "
-                                          f"→ {color}₹{pnl:+,.0f}\033[0m")
+                                          f"-> {color}Rs{pnl:+,.0f}\033[0m")
                                 continue
+
+                # Increment candle counter in position metadata (used by bb_squeeze no-follow-through exit)
+                if pos.get("strategy") == "bb_squeeze":
+                    meta = pos.setdefault("metadata", {})
+                    meta["candles_since_breakout"] = meta.get("candles_since_breakout", 0) + 1
 
                 # Strategy-level exit check
                 if strategy is not None:
@@ -745,7 +850,7 @@ class Simulator:
                                 f"{time_str} EXIT [{result['strategy']}] "
                                 f"{result['direction']} "
                                 f"@ {result['exit_price']:.1f} "
-                                f"→ {color}₹{pnl:+,.0f}\033[0m "
+                                f"-> {color}Rs{pnl:+,.0f}\033[0m "
                                 f"({result['exit_reason']})"
                             )
                         continue

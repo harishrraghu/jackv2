@@ -1,0 +1,68 @@
+# Knowledge Base: Time-of-Day Patterns for BANKNIFTY
+# Last updated: 2026-04-14
+# Source: Tier 1 (own backtest data)
+# Confidence: MEDIUM-HIGH
+
+time_of_day:
+  opening_15min:
+    window: "09:15 - 09:30"
+    behavior: "High volatility, gaps settle, ORB forms"
+    action: "OBSERVE only. Do NOT trade."
+    notes:
+      - "Record Opening Range for ORB strategy"
+      - "Gap direction sets morning bias"
+    confidence: 0.85
+
+  morning_setup:
+    window: "09:30 - 10:15"
+    behavior: "Gap fills, morning reversals"
+    best_strategies: ["gap_fill", "gap_up_fade"]
+    edge_quality: "MEDIUM"
+    notes:
+      - "Small gaps (< 0.5%) fill 73% of the time in this window"
+      - "Watch PCR before fading gaps"
+    confidence: 0.72
+
+  golden_hour:
+    window: "10:15 - 11:15"
+    behavior: "First hour verdict crystallizes, highest edge window"
+    best_strategies: ["first_hour_verdict"]
+    edge_quality: "HIGH"
+    notes:
+      - "This is the BEST trading window"
+      - "FHV direction is most reliable here (68%+ accuracy)"
+      - "Strong FH (>0.5% move) → even higher accuracy"
+      - "Most trades should be taken in this window"
+    win_rate_boost: 0.08
+    confidence: 0.80
+
+  dead_zone:
+    window: "11:15 - 13:15"
+    behavior: "Low volume, choppy, mean-reverting"
+    best_strategies: ["vwap_reversion", "bb_squeeze"]
+    edge_quality: "LOW"
+    notes:
+      - "Avoid new entries unless squeeze breakout"
+      - "Manage existing positions"
+      - "Good time for VWAP reversion scalps"
+    confidence: 0.72
+
+  afternoon_push:
+    window: "13:15 - 15:00"
+    behavior: "Second directional move, FII/DII effects"
+    best_strategies: ["afternoon_breakout", "first_hour_verdict"]
+    edge_quality: "MEDIUM-HIGH"
+    notes:
+      - "Often a continuation of morning direction"
+      - "On expiry day, max pain pull strongest here"
+      - "FII/DII flow impact becomes visible"
+    confidence: 0.68
+
+  closing:
+    window: "15:00 - 15:30"
+    behavior: "Squaring up, short covering, no new entries"
+    action: "EXIT all positions. No new entries."
+    notes:
+      - "Never enter new trades after 15:00"
+      - "Short covering rallies common in last 15 min"
+    confidence: 0.90

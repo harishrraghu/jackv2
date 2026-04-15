@@ -1,0 +1,59 @@
+# Knowledge Base: Custom Indicator Thresholds for BANKNIFTY
+# Last updated: 2026-04-14
+# These differ from textbook defaults based on BN's characteristics
+
+custom_thresholds:
+  RSI:
+    overbought: 70      # Standard
+    oversold: 30         # Standard
+    extreme_high: 85     # Block LONG above this
+    extreme_low: 15      # Block SHORT below this
+    bn_oversold: 35      # For BN, consider 35 as oversold (not 30)
+    bn_overbought: 65    # For BN, consider 65 as first warning
+    notes:
+      - "BANKNIFTY RSI rarely goes below 25 or above 80"
+      - "35 is a better oversold threshold for BANKNIFTY"
+
+  ATR:
+    normal_range: [200, 450]
+    high_volatility: 500
+    extreme_volatility: 700
+    position_size_factor:
+      low: 1.2       # ATR < 250 → can take larger size
+      normal: 1.0
+      high: 0.7      # ATR > 500 → reduce size
+      extreme: 0.4   # ATR > 700 → minimal size
+
+  ADX:
+    trending: 25         # ADX > 25 = trending
+    strong_trend: 35     # ADX > 35 = strong trend
+    range: 20            # ADX < 20 = ranging
+    notes:
+      - "Textbook says 25, but for BN 20 is better range threshold"
+
+  Bollinger_Bands:
+    squeeze_width: 2.0   # BB Width < 2% = squeeze
+    breakout_width: 4.0  # BB Width > 4% = expanded, trend in play
+    notes:
+      - "BN squeezes often resolve within 1-3 days"
+
+  indicator_combos:
+    strong_bullish:
+      conditions:
+        - "RSI < 35"
+        - "PCR > 1.2"
+        - "Bullish OI buildup"
+      win_rate: 0.78
+      sample_size: 45
+      notes: "Triple bullish confluence — high confidence LONG"
+      confidence: 0.72
+
+    strong_bearish:
+      conditions:
+        - "RSI > 65"
+        - "PCR < 0.7"
+        - "Short buildup in OI"
+      win_rate: 0.74
+      sample_size: 38
+      notes: "Triple bearish confluence — high confidence SHORT"
+      confidence: 0.70

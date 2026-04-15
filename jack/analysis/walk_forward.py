@@ -106,8 +106,8 @@ class WalkForwardValidator:
 
         for i, window in enumerate(windows):
             print(f"  Window {i+1}/{len(windows)}: "
-                  f"Train {window['train_start']}→{window['train_end']} | "
-                  f"Test {window['test_start']}→{window['test_end']}")
+                  f"Train {window['train_start']}->{window['train_end']} | "
+                  f"Test {window['test_start']}->{window['test_end']}")
 
             # Create a temporary config with this window's dates
             temp_config = copy.deepcopy(self.config)
@@ -205,15 +205,15 @@ class WalkForwardValidator:
             print(f"  {'-'*8} {'-'*27} {'-'*27} {'-'*12} {'-'*12} {'-'*10}")
 
             for i, w in enumerate(result["windows"]):
-                train_period = f"{w['train_start']} → {w['train_end']}"
-                test_period = f"{w['test_start']} → {w['test_end']}"
+                train_period = f"{w['train_start']} -> {w['train_end']}"
+                test_period = f"{w['test_start']} -> {w['test_end']}"
                 train_pnl = w.get("train_pnl", 0)
                 test_pnl = w.get("test_pnl", 0)
                 deg = w.get("degradation_ratio", 0)
 
                 pnl_indicator = "✓" if test_pnl > 0 else "✗"
                 print(f"  {i+1:<8} {train_period:<27} {test_period:<27} "
-                      f"₹{train_pnl:>+10,.0f} ₹{test_pnl:>+10,.0f} "
+                      f"Rs{train_pnl:>+10,.0f} Rs{test_pnl:>+10,.0f} "
                       f"{deg:>8.2f}  {pnl_indicator}")
 
         print(f"\n  Survival Rate: {result.get('survival_rate', 0):.1%} "

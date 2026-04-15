@@ -13,11 +13,11 @@ class VWAPReversion(Strategy):
 
     def __init__(self, params: dict = None):
         default_params = {
-            "vwap_dev_pct": 0.20,
-            "rsi_extreme_offset": 15,  # Offset from 50 (35 and 65)
-            "adx_threshold": 30,
-            "max_dev_stop_pct": 0.15,
-            "target_overshoot_pct": 0.10, # Target is VWAP extended by this %
+            "vwap_dev_pct": 0.60,          # Raised further — only trade extreme stretches
+            "rsi_extreme_offset": 20,       # RSI 70+ short, 30- long
+            "adx_threshold": 22,            # Strict range-day filter
+            "max_dev_stop_pct": 0.25,       # Wider stop to avoid noise stops
+            "target_overshoot_pct": 0.25,  # Bigger target for 3:1+ R:R
         }
         if params:
             default_params.update(params)
@@ -99,6 +99,7 @@ class VWAPReversion(Strategy):
                 "dev_pct": dev_pct,
                 "rsi": rsi,
                 "adx": adx,
+                "risk_multiplier": 0.15,  # Minimal size — mean reversion is weak on trending market
             }
         )
 
@@ -111,24 +112,28 @@ class VWAPReversion(Strategy):
     ) -> ExitSignal:
         """Exit at target (VWAP overshot), stop, or time."""
         direction = position.get("direction", "LONG")
-        target = position.get("target", 0)
-        stop_loss = position.get("stop_loss", 0)
-        
+        target = position.get("target", None)
+        stop_loss = position.get("stop_loss", None)
+
+        # Validate stop/target exist before using them
+        if stop_loss is None or target is None or stop_loss <= 0 or target <= 0:
+            return ExitSignal(False, current_price, "hold")
+
         # Time exit at 13:30
         if current_time >= "13:30":
             return ExitSignal(True, current_price, "time_exit")
-            
+
         if direction == "LONG":
             if current_price <= stop_loss:
                 return ExitSignal(True, stop_loss, "stop_hit")
             if current_price >= target:
                 return ExitSignal(True, target, "target_hit")
-        else:
+        else:  # SHORT
             if current_price >= stop_loss:
                 return ExitSignal(True, stop_loss, "stop_hit")
             if current_price <= target:
                 return ExitSignal(True, target, "target_hit")
-                
+
         return ExitSignal(False, current_price, "hold")
 
     def score(self, signal: TradeSignal, filters: dict) -> float:

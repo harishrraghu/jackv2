@@ -1,0 +1,45 @@
+# Knowledge Base: Gap Patterns for BANKNIFTY
+# Last updated: 2026-04-14
+# Source: Tier 1 (own backtest data 2015-2024)
+# Confidence: HIGH
+
+gap_fill:
+  small_gap_up:
+    threshold_pct: [0.1, 0.5]
+    fill_probability: 0.73
+    avg_fill_time_minutes: 90
+    best_strategy: "gap_fill"
+    conditions:
+      - "Works best when PCR > 0.9"
+      - "Fails on strong trending days (ADX > 35)"
+    validated_on: "2015-2024 backtest"
+    sample_size: 412
+    confidence: 0.85
+
+  large_gap_up:
+    threshold_pct: [0.5, 999]
+    fill_probability: 0.42
+    behavior: "Usually does NOT fill. Fading is dangerous."
+    best_strategy: "breakout_follow"
+    caution: "Do not fade gaps > 0.75% on Monday"
+    validated_on: "2015-2024 backtest"
+    sample_size: 187
+    confidence: 0.80
+
+  gap_down:
+    threshold_pct: [-999, -0.1]
+    fill_probability: 0.68
+    best_strategy: "gap_fill"
+    conditions:
+      - "Higher fill rate when VIX is declining"
+      - "Lower fill rate near support levels"
+    validated_on: "2015-2024 backtest"
+    sample_size: 389
+    confidence: 0.82
+
+  flat_open:
+    threshold_pct: [-0.1, 0.1]
+    behavior: "Wait for first hour direction"
+    best_strategy: "first_hour_verdict"
+    notes: "Flat opens give clean FHV signals"
+    confidence: 0.75

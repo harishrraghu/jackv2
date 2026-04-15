@@ -49,7 +49,7 @@ class BrainInterface:
         output = []
         output.append(f"MORNING BRIEFING: {date_str}")
         output.append(f"Day of Week: {briefing.get('day_of_week')}")
-        output.append(f"Current Capital: ₹{briefing.get('capital', 0):,.2f}")
+        output.append(f"Current Capital: Rs{briefing.get('capital', 0):,.2f}")
         output.append(f"Drawdown: {briefing.get('drawdown', {}).get('current_drawdown_pct', 0):.2f}%")
         
         output.append("\nMARKET CONDITIONS:")

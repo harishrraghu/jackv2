@@ -6,3 +6,14 @@ tabulate>=0.9
 scipy>=1.10
 anthropic>=0.25.0
 yfinance>=0.2.38
+dhanhq>=2.0
+python-dotenv>=1.0
+# Web scraping / Tier 3 learner
+requests>=2.31
+beautifulsoup4>=4.12
+youtube-transcript-api>=0.6
+pdfplumber>=0.10
+# API server
+fastapi>=0.110
+uvicorn>=0.27
+# UI npm packages handled separately

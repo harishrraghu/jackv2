@@ -1,0 +1,58 @@
+# Knowledge Base: Indicator Best Practices by Regime
+# Last updated: 2026-04-14
+# Source: Tier 1 (backtest analysis)
+
+best_by_regime:
+  trending_strong:
+    primary: ["EMA_9_21_crossover", "ADX"]
+    secondary: ["MACD", "Supertrend"]
+    avoid: ["RSI"]  # RSI stays overbought/oversold in trends
+    notes:
+      - "EMA crossover is the strongest trending signal"
+      - "ADX > 30 confirms trend strength"
+      - "Do NOT use RSI for mean reversion in trending markets"
+    confidence: 0.78
+
+  range_bound:
+    primary: ["RSI", "Bollinger_Bands"]
+    secondary: ["VWAP", "Stochastic"]
+    avoid: ["EMA_crossover"]  # Whipsaws in ranges
+    notes:
+      - "RSI overbought/oversold works well in ranges"
+      - "BB width < 2% = squeeze forming"
+      - "VWAP acts as mean in range markets"
+    confidence: 0.75
+
+  volatile:
+    primary: ["ATR", "VWAP"]
+    secondary: ["RSI"]
+    notes:
+      - "ATR for position sizing — wider stops needed"
+      - "VWAP as anchor for entry timing"
+      - "RSI extremes (< 20 or > 80) are bounce signals"
+    confidence: 0.70
+
+best_by_timeframe:
+  first_hour:
+    primary: ["RSI_5m", "VWAP"]
+    secondary: ["EMA_9_5m", "ORB"]
+    notes:
+      - "5-minute RSI for short-term reversals"
+      - "VWAP for mean reversion entries"
+    confidence: 0.72
+
+  midday:
+    primary: ["Bollinger_Bands", "VWAP"]
+    secondary: ["Stochastic"]
+    notes:
+      - "BB squeeze setups form in dead zone"
+      - "VWAP reversion works well 11:15-13:15"
+    confidence: 0.65
+
+  afternoon:
+    primary: ["ADX", "EMA_9_21"]
+    secondary: ["MACD"]
+    notes:
+      - "ADX confirms afternoon trend strength"
+      - "MACD histogram for momentum confirmation"
+    confidence: 0.68

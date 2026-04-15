@@ -36,7 +36,7 @@ class AlertManager:
             "Trade Exited",
             f"Closed {direction} from {strategy_name} @ {exit_price:.2f}\n"
             f"Reason: {reason}\n"
-            f"Net P&L: ₹{sign}{pnl:.2f}"
+            f"Net P&L: Rs{sign}{pnl:.2f}"
         )
 
     def trigger_daily_pnl_threshold(self, daily_pnl: float):
@@ -44,7 +44,7 @@ class AlertManager:
         if abs(daily_pnl) >= 10000:
             self._send(
                 "Daily P&L Milestone",
-                f"Current Daily P&L has crossed ±10k threshold: ₹{sign}{daily_pnl:.2f}"
+                f"Current Daily P&L has crossed +-10k threshold: Rs{sign}{daily_pnl:.2f}"
             )
 
     def trigger_drawdown_warning(self, dd_pct: float):

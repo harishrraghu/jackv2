@@ -161,7 +161,7 @@ class FirstHourVerdict(Strategy):
                 "fh_direction": fh_direction,
                 "atr": atr,
                 "rsi": rsi,
-                "risk_multiplier": 2.5,  # Position sizing multiplier (2.5x base risk), not risk:reward ratio
+                "risk_multiplier": 7.0,  # 7x base risk — high confidence strategy (69% win rate)
                 "max_price_since_entry": current_price,
                 "min_price_since_entry": current_price,
             },

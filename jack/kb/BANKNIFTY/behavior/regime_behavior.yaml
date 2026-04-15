@@ -1,0 +1,74 @@
+# Knowledge Base: Regime Behavior for BANKNIFTY
+# Last updated: 2026-04-14
+# Source: Tier 1 (backtest data analysis)
+# Confidence: HIGH
+
+regime_behavior:
+  trending_strong:
+    description: "ADX > 30, clear directional move, EMA 9 > EMA 21 (or reversed)"
+    frequency_pct: 22  # ~22% of trading days
+    best_strategies:
+      - "first_hour_verdict"
+      - "afternoon_breakout"
+    worst_strategies:
+      - "vwap_reversion"  # Mean reversion fails in trends
+      - "gap_fill"         # Gaps don't fill in strong trends
+    position_sizing: 1.0  # Full size
+    notes:
+      - "Trail stops instead of fixed targets"
+      - "Add to winners on pullbacks"
+      - "FHV accuracy highest in trending regimes (72%+)"
+    confidence: 0.82
+
+  trending_weak:
+    description: "ADX 20-30, mild directional bias, choppy"
+    frequency_pct: 25
+    best_strategies:
+      - "first_hour_verdict"
+      - "bb_squeeze"
+    position_sizing: 0.8
+    notes:
+      - "Use tighter targets (1.5x ATR instead of 2x)"
+      - "Higher false breakout risk"
+    confidence: 0.70
+
+  range_bound:
+    description: "ADX < 20, BB squeeze forming, low volatility"
+    frequency_pct: 35
+    best_strategies:
+      - "vwap_reversion"
+      - "bb_squeeze"
+    worst_strategies:
+      - "afternoon_breakout"
+      - "first_hour_verdict"  # Lower win rate in ranges
+    position_sizing: 0.7
+    notes:
+      - "Sell at resistance, buy at support"
+      - "Use Bollinger Bands for entries"
+      - "Watch for squeeze breakout setup"
+    confidence: 0.75
+
+  volatile:
+    description: "ATR > 1.5x avg, VIX > 20, large intraday swings"
+    frequency_pct: 12
+    best_strategies:
+      - "first_hour_verdict"  # Strong FH gives direction
+    position_sizing: 0.5  # HALF size in volatile regime
+    notes:
+      - "Wider stops required (2x ATR minimum)"
+      - "Higher reward potential but higher risk"
+      - "Avoid multiple trades per day"
+    circuit_breaker: "If VIX > 30, reduce to 0.3x size"
+    confidence: 0.78
+
+  squeeze:
+    description: "BB Width < 2%, low ATR, coiling for breakout"
+    frequency_pct: 6
+    best_strategies:
+      - "bb_squeeze"
+    position_sizing: 0.6
+    notes:
+      - "Wait for breakout confirmation (close outside BB)"
+      - "Direction of breakout matters more than signals"
+      - "First move can be a fakeout — wait for retest"
+    confidence: 0.68

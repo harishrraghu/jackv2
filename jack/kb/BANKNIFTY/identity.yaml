@@ -1,0 +1,57 @@
+# BANKNIFTY Market Identity
+# The core characteristics that define this instrument
+
+identity:
+  name: "BANKNIFTY"
+  full_name: "Nifty Bank Index"
+  exchange: "NSE"
+  country: "India"
+  currency: "INR"
+  
+  # Trading hours (IST)
+  market_hours:
+    pre_open: "09:00"
+    open: "09:15"
+    close: "15:30"
+    post_close: "15:40"
+  
+  # Instrument specs
+  lot_size: 15
+  tick_size: 0.05
+  expiry_day: "Wednesday"  # Weekly expiry
+  monthly_expiry: "last_thursday"
+  
+  # Typical characteristics
+  typical_ranges:
+    daily_range_pts: [200, 600]       # Normal day range in points
+    atr_14d_typical: [300, 500]       # Typical 14-day ATR
+    gap_typical_pct: [-0.5, 0.5]      # Normal gap range
+    vix_normal: [12, 20]              # Normal India VIX range
+    
+  # Composition
+  top_weights:
+    - { name: "HDFC Bank", weight_pct: 28 }
+    - { name: "ICICI Bank", weight_pct: 22 }
+    - { name: "Kotak Bank", weight_pct: 12 }
+    - { name: "Axis Bank", weight_pct: 10 }
+    - { name: "SBI", weight_pct: 9 }
+  
+  # Key events that affect this instrument
+  sensitivity:
+    - "RBI monetary policy"
+    - "US Fed rate decisions"
+    - "India GDP data"
+    - "Banking sector results" 
+    - "Budget day"
+    - "Credit policy review"
+    - "NPA/provisioning data"
+
+  # Data availability
+  data_available:
+    historical_candles:
+      start: "2015-01-01"
+      end: "2024-04-12"
+      timeframes: ["1d", "2h", "1h", "15m", "5m", "1m"]
+    option_chain: false  # No historical OI data yet
+    vix_history: true    # Can fetch from Yahoo Finance
+    fii_dii: false       # Can scrape from NSE

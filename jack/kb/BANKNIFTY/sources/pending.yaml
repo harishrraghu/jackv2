@@ -1,0 +1,15 @@
+# Pending Sources — awaiting validation against backtest data
+# Last updated: 2026-04-14
+pending: []
+
+# Format:
+# - source_id: "src_YYYYMMDD_NNN"
+#   type: "pdf|youtube|blog|book|api"
+#   title: "Source title"
+#   url_or_path: "path or URL"
+#   ingested_date: "YYYY-MM-DD"
+#   claims:
+#     - claim: "Description of the claim"
+#       testable: true/false
+#       test_query: "SQL query or backtest config to validate"
+#       priority: "high|medium|low"

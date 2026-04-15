@@ -1,0 +1,47 @@
+# Jack Knowledge Base Schema
+# Version: 1.0
+# Last updated: 2026-04-14
+
+schema:
+  version: "1.0"
+  description: "Jack Trading System Knowledge Base"
+  
+rules:
+  # Only the Learner agent can write to behavior/ and indicators/
+  # Only the Builder agent can write to strategies/
+  # Only the Trader/Learner can write to risk/
+  # All writes must include metadata: last_updated, confidence, source
+
+  validation:
+    min_sample_size: 30           # Minimum trades/observations for a pattern
+    min_confidence: 0.55          # Minimum confidence for validated patterns
+    holdout_required: true        # Must validate on holdout data before KB entry
+    max_staleness_days: 180       # Re-validate patterns older than this
+
+  confidence_levels:
+    critical: 0.90    # "Always do this" — backed by 1000+ observations
+    high: 0.80        # Strong evidence, large sample
+    medium: 0.65      # Reasonable evidence, moderate sample
+    low: 0.55         # Preliminary evidence, needs more data
+    unvalidated: 0.0  # Not yet tested against data
+
+  sources_hierarchy:
+    - tier_1_own_data      # Highest priority: own backtest/trade data
+    - tier_2_structured    # APIs: NSE, Dhan, Yahoo Finance
+    - tier_3_curated       # PDFs, books, expert blogs
+    - tier_3_web           # General web, YouTube, forums
+
+structure:
+  per_market:
+    - identity.yaml
+    - behavior/
+    - indicators/
+    - strategies/
+    - risk/
+    - sources/
+    - _performance.db
+
+  global:
+    - market_relationships.yaml
+    - macro_events.yaml
+    - risk_rules.yaml

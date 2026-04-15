@@ -92,8 +92,19 @@ class RiskManager:
         # Round DOWN to nearest lot_size multiple
         lots = int(raw_quantity // self.lot_size)
 
-        # Cap at 30 lots max to prevent catastrophic sizing, while allowing core alpha to scale
-        max_lots = 30
+        # Always trade at least 1 lot when capital allows the notional exposure.
+        # This prevents wide-stop strategies (first_hour_verdict, ATR-based) from
+        # being blocked simply because the risk-budget math rounds to 0 lots.
+        if lots == 0:
+            # Can we afford the notional of 1 lot at 10% intraday margin?
+            notional_1lot = self.lot_size * entry_price
+            margin_required = notional_1lot * 0.10   # conservative intraday margin
+            if self.current_capital >= margin_required:
+                lots = 1
+
+        # Cap at 8 lots max (120 units) to prevent catastrophic single-trade ruin.
+        # Tight-stop strategies (vwap_reversion, delta_scalp) would otherwise get 300+ units.
+        max_lots = 8
         lots = min(lots, max_lots)
 
         quantity = lots * self.lot_size
@@ -237,7 +248,10 @@ class RiskManager:
             "entry_date": None,  # Set by simulator
             "confidence": signal.confidence,
             "reason": signal.reason,
-            "metadata": signal.metadata,
+            "metadata": {
+                **signal.metadata,
+                "original_direction": signal.direction,  # immutable reference for PositionManager
+            },
         }
 
         self.open_position = position

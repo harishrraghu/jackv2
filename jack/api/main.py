@@ -2,12 +2,12 @@
 Jack FastAPI backend.
 
 Endpoints:
-  GET  /api/days/{split}          → list of trading days with P&L summary
-  GET  /api/day/{split}/{date}    → candles + indicators + trades + market profile
-  GET  /api/equity/{split}        → equity curve
-  GET  /api/metrics/{split}       → strategy/dow stats
-  GET  /api/shortcomings/{split}  → shortcoming flags
-  POST /api/run/{split}           → trigger simulation
+  GET  /api/days/{split}          -> list of trading days with P&L summary
+  GET  /api/day/{split}/{date}    -> candles + indicators + trades + market profile
+  GET  /api/equity/{split}        -> equity curve
+  GET  /api/metrics/{split}       -> strategy/dow stats
+  GET  /api/shortcomings/{split}  -> shortcoming flags
+  POST /api/run/{split}           -> trigger simulation
 """
 
 import json
@@ -21,6 +21,7 @@ import numpy as np
 import pandas as pd
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 _ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_ROOT))
@@ -341,7 +342,7 @@ def _unix_to_hhmm(unix: int) -> str:
 # ──────────────────────────────────────────────────────────────────────────────
 
 def _to_entry_unix(date: str, time_str: str) -> int | None:
-    """'YYYY-MM-DD' + 'HH:MM' → UTC unix with IST offset removed."""
+    """'YYYY-MM-DD' + 'HH:MM' -> UTC unix with IST offset removed."""
     try:
         dt = datetime.strptime(f"{date} {time_str[:5]}", "%Y-%m-%d %H:%M")
         return int(dt.timestamp()) - 19800
@@ -454,7 +455,7 @@ def get_day(split: str, date: str):
         "candles":    candles,
         "indicators": indicators,
         "trades":     trades,
-        "profile":    profile,       # ← rich market context
+        "profile":    profile,       # <- rich market context
         "decision_log":         journal_entry.get("strategies_evaluated", []),
         "missed_opportunities": journal_entry.get("missed_opportunities", []),
         "morning_scan":         journal_entry.get("morning_scan", {}),
@@ -564,7 +565,7 @@ def get_shortcomings(split: str):
             flags.append({
                 "severity": "MEDIUM",
                 "category": f"Strategy: {name}",
-                "message": f"{name.replace('_', ' ').title()} is net negative (₹{s_pnl:,.0f}) over {s_trades} trades.",
+                "message": f"{name.replace('_', ' ').title()} is net negative (Rs{s_pnl:,.0f}) over {s_trades} trades.",
                 "recommendation": f"Disable or retune {name}. Check its entry conditions.",
             })
         elif s_trades >= 5 and s_wr < 40:
@@ -610,3 +611,567 @@ def run_simulation(split: str):
         }
     except Exception as e:
         return {"status": "error", "message": str(e)}
+
+
+# ── LIVE SYSTEM ENDPOINTS ─────────────────────────────────────────────────────
+
+def _is_market_hours() -> bool:
+    """Return True if current IST time is within market hours (9:15–15:30)."""
+    now_ist = datetime.now()
+    h, m = now_ist.hour, now_ist.minute
+    return (9, 15) <= (h, m) <= (15, 30)
+
+
+@app.get("/api/live/status")
+def get_live_status():
+    """Trader phase, open positions count, today's P&L, last signal, market hours."""
+    try:
+        from brain.agent_state import AgentStateManager
+        trader_state = AgentStateManager.load("trader").state
+    except Exception as e:
+        trader_state = {"phase": "UNKNOWN", "error": str(e)}
+
+    positions = []
+    today_pnl = 0.0
+    funds_ok = False
+    dhan_error = None
+
+    try:
+        from data.dhan_client import DhanClient
+        client = DhanClient()
+        raw_positions = client.get_positions()
+        if isinstance(raw_positions, dict) and raw_positions.get("data"):
+            positions = raw_positions["data"]
+        elif isinstance(raw_positions, list):
+            positions = raw_positions
+        for pos in positions:
+            today_pnl += float(pos.get("unrealizedProfit", pos.get("pnl", 0)) or 0)
+        funds_ok = True
+    except Exception as e:
+        dhan_error = str(e)
+
+    return {
+        "phase":         trader_state.get("phase", "IDLE"),
+        "last_active":   trader_state.get("last_active"),
+        "current_task":  trader_state.get("current_task"),
+        "open_positions": len(positions),
+        "today_pnl":     round(today_pnl, 2),
+        "market_open":   _is_market_hours(),
+        "dhan_connected": funds_ok,
+        "dhan_error":    dhan_error,
+        "last_signal":   trader_state.get("context", {}).get("last_signal"),
+        "session_id":    trader_state.get("session_id"),
+    }
+
+
+@app.get("/api/live/positions")
+def get_live_positions():
+    """Open positions from Dhan API."""
+    try:
+        from data.dhan_client import DhanClient
+        client = DhanClient()
+        result = client.get_positions()
+        if isinstance(result, dict):
+            if result.get("status") == "failure":
+                return {"status": "offline", "reason": result.get("remarks", "Dhan API error"), "positions": []}
+            return {"status": "ok", "positions": result.get("data", [])}
+        return {"status": "ok", "positions": result or []}
+    except Exception as e:
+        return {"status": "offline", "reason": str(e), "positions": []}
+
+
+@app.get("/api/live/orders")
+def get_live_orders():
+    """Today's order book from Dhan API."""
+    try:
+        from data.dhan_client import DhanClient
+        client = DhanClient()
+        result = client.get_order_list()
+        if isinstance(result, dict):
+            if result.get("status") == "failure":
+                return {"status": "offline", "reason": result.get("remarks", "Dhan API error"), "orders": []}
+            return {"status": "ok", "orders": result.get("data", [])}
+        return {"status": "ok", "orders": result or []}
+    except Exception as e:
+        return {"status": "offline", "reason": str(e), "orders": []}
+
+
+@app.get("/api/live/funds")
+def get_live_funds():
+    """Account balance, margin, and available funds from Dhan API."""
+    try:
+        from data.dhan_client import DhanClient
+        client = DhanClient()
+        result = client.get_fund_limits()
+        if isinstance(result, dict):
+            if result.get("status") == "failure":
+                return {"status": "offline", "reason": result.get("remarks", "Dhan API error")}
+            data = result.get("data", result)
+            return {"status": "ok", "funds": data}
+        return {"status": "offline", "reason": "Unexpected response format"}
+    except Exception as e:
+        return {"status": "offline", "reason": str(e)}
+
+
+@app.get("/api/live/price/{symbol}")
+def get_live_price(symbol: str):
+    """Live spot price and OHLC for a symbol."""
+    try:
+        from data.dhan_fetcher import DhanFetcher
+        fetcher = DhanFetcher()
+        # Try get_spot_ohlc first; fall back to get_spot_price
+        if hasattr(fetcher, "get_spot_ohlc"):
+            result = fetcher.get_spot_ohlc(symbol.upper())
+        else:
+            price = fetcher.get_spot_price(symbol.upper())
+            result = {"ltp": price, "symbol": symbol.upper()}
+        if result is None:
+            return {"status": "offline", "reason": "No data returned", "symbol": symbol.upper()}
+        return {"status": "ok", "symbol": symbol.upper(), "data": result}
+    except Exception as e:
+        return {"status": "offline", "reason": str(e), "symbol": symbol.upper()}
+
+
+@app.get("/api/live/option-chain/{symbol}")
+def get_live_option_chain(symbol: str):
+    """Parsed option chain with OI, IV, and Greeks."""
+    try:
+        from data.dhan_fetcher import DhanFetcher
+        fetcher = DhanFetcher()
+        df = fetcher.get_option_chain_df(symbol.upper())
+        if df is None or (hasattr(df, "empty") and df.empty):
+            return {"status": "offline", "reason": "Empty option chain", "symbol": symbol.upper(), "chain": []}
+        if hasattr(df, "to_dict"):
+            chain = df.to_dict(orient="records")
+        else:
+            chain = df
+        return {"status": "ok", "symbol": symbol.upper(), "chain": chain}
+    except Exception as e:
+        return {"status": "offline", "reason": str(e), "symbol": symbol.upper(), "chain": []}
+
+
+# ── KNOWLEDGE BASE ENDPOINTS ──────────────────────────────────────────────────
+
+def _get_kb(market: str = "BANKNIFTY"):
+    from kb.reader import KBReader
+    return KBReader(market)
+
+
+@app.get("/api/kb/strategies")
+def get_kb_strategies():
+    """All active strategies with win rates, conditions, and notes."""
+    try:
+        kb = _get_kb()
+        strategies = kb.get_active_strategies()
+        candidates = kb.get_candidate_strategies()
+        return {
+            "status": "ok",
+            "active": strategies,
+            "candidates": candidates,
+        }
+    except Exception as e:
+        return {"status": "error", "reason": str(e), "active": {}, "candidates": {}}
+
+
+@app.get("/api/kb/behavior/{pattern}")
+def get_kb_behavior(pattern: str):
+    """A specific behavior pattern YAML (gap_patterns, day_of_week, etc.)."""
+    try:
+        kb = _get_kb()
+        data = kb.get_behavior(pattern)
+        if not data:
+            return {"status": "not_found", "pattern": pattern, "data": {}}
+        return {"status": "ok", "pattern": pattern, "data": data}
+    except Exception as e:
+        return {"status": "error", "reason": str(e), "pattern": pattern, "data": {}}
+
+
+@app.get("/api/kb/behaviors")
+def get_kb_behaviors():
+    """All behavior patterns as a dict."""
+    try:
+        kb = _get_kb()
+        data = kb.get_all_behaviors()
+        return {"status": "ok", "behaviors": data}
+    except Exception as e:
+        return {"status": "error", "reason": str(e), "behaviors": {}}
+
+
+@app.get("/api/kb/risk")
+def get_kb_risk():
+    """Risk rules, circuit breakers, and event rules."""
+    try:
+        kb = _get_kb()
+        return {
+            "status": "ok",
+            "rules":            kb.get_risk_rules(),
+            "circuit_breakers": kb.get_circuit_breakers(),
+            "events":           kb.get_risk_events(),
+        }
+    except Exception as e:
+        return {"status": "error", "reason": str(e), "rules": {}, "circuit_breakers": {}, "events": {}}
+
+
+@app.get("/api/kb/performance")
+def get_kb_performance(days: int = 30):
+    """Recent trade performance from _performance.db."""
+    try:
+        import sqlite3 as _sqlite3
+        kb = _get_kb()
+        conn = kb.get_db_connection()
+        limit = max(1, days * 10)  # rough upper bound on rows
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT date, strategy, direction, pnl, exit_reason "
+            "FROM trades ORDER BY date DESC LIMIT ?",
+            (limit,),
+        )
+        rows = cur.fetchall()
+        cols = ["date", "strategy", "direction", "pnl", "exit_reason"]
+        trades = [dict(zip(cols, row)) for row in rows]
+
+        # Also pull daily_metrics if available
+        daily = []
+        try:
+            cur.execute(
+                "SELECT * FROM daily_metrics ORDER BY date DESC LIMIT ?",
+                (days,),
+            )
+            d_rows = cur.fetchall()
+            d_cols = [desc[0] for desc in cur.description]
+            daily = [dict(zip(d_cols, r)) for r in d_rows]
+        except Exception:
+            pass
+
+        conn.close()
+        return {"status": "ok", "days": days, "trades": trades, "daily_metrics": daily}
+    except Exception as e:
+        return {"status": "error", "reason": str(e), "trades": [], "daily_metrics": []}
+
+
+@app.get("/api/kb/discoveries")
+def get_kb_discoveries():
+    """Pending and validated sources for the Learner panel."""
+    try:
+        kb = _get_kb()
+        pending   = kb.get_sources("pending")
+        validated = kb.get_sources("validated")
+        return {
+            "status":    "ok",
+            "pending":   pending,
+            "validated": validated,
+        }
+    except Exception as e:
+        return {"status": "error", "reason": str(e), "pending": [], "validated": []}
+
+
+# ── AGENT INBOX ENDPOINTS ─────────────────────────────────────────────────────
+
+_VALID_AGENTS = {"trader", "learner", "builder", "charting"}
+
+
+@app.get("/api/inbox/{agent}")
+def get_inbox(agent: str):
+    """Unread messages in an agent's inbox."""
+    if agent not in _VALID_AGENTS:
+        raise HTTPException(400, f"Invalid agent: {agent}. Must be one of {sorted(_VALID_AGENTS)}")
+    try:
+        from brain.messages import MessageBus
+        bus = MessageBus()
+        messages = bus.read_inbox(agent, unread_only=True)
+        # Strip internal filepath fields before returning
+        clean = [{k: v for k, v in m.items() if not k.startswith("_")} for m in messages]
+        return {"status": "ok", "agent": agent, "count": len(clean), "messages": clean}
+    except Exception as e:
+        return {"status": "error", "reason": str(e), "agent": agent, "messages": []}
+
+
+@app.delete("/api/inbox/{agent}/{msg_id}")
+def delete_inbox_message(agent: str, msg_id: str):
+    """Mark a message as processed (moves it out of the inbox)."""
+    if agent not in _VALID_AGENTS:
+        raise HTTPException(400, f"Invalid agent: {agent}")
+    try:
+        from brain.messages import MessageBus
+        bus = MessageBus()
+        success = bus.mark_processed(agent, msg_id)
+        if success:
+            return {"status": "ok", "msg_id": msg_id, "processed": True}
+        return {"status": "not_found", "msg_id": msg_id, "processed": False}
+    except Exception as e:
+        return {"status": "error", "reason": str(e), "msg_id": msg_id}
+
+
+class SendMessageRequest(BaseModel):
+    from_agent: str
+    to_agent: str
+    type: str
+    subject: str
+    body: dict = {}
+    priority: str = "normal"
+
+
+@app.post("/api/inbox/send")
+def send_inbox_message(req: SendMessageRequest):
+    """Send a message via the MessageBus."""
+    if req.to_agent not in _VALID_AGENTS:
+        raise HTTPException(400, f"Invalid to_agent: {req.to_agent}")
+    try:
+        from brain.messages import MessageBus
+        bus = MessageBus()
+        msg_id = bus.send(
+            from_agent=req.from_agent,
+            to_agent=req.to_agent,
+            msg_type=req.type,
+            subject=req.subject,
+            body=req.body,
+            priority=req.priority,
+        )
+        return {"status": "ok", "msg_id": msg_id}
+    except Exception as e:
+        return {"status": "error", "reason": str(e)}
+
+
+# ── TIME MACHINE ENDPOINTS ────────────────────────────────────────────────────
+
+_CACHE_DIR = _ROOT / "data" / "cache"
+
+
+def _replay_cache_path(start_date: str, end_date: str) -> Path:
+    return _CACHE_DIR / f"replay_{start_date}_{end_date}.json"
+
+
+def _serialize_replay_results(results: dict) -> dict:
+    """Deep-serialize TimeMachine results for JSON response."""
+    import math
+
+    def _convert(obj):
+        if hasattr(obj, "to_dict") and callable(obj.to_dict):
+            return _convert(obj.to_dict())
+        if hasattr(obj, "tolist"):
+            return obj.tolist()
+        if isinstance(obj, float):
+            if math.isinf(obj) or math.isnan(obj):
+                return None
+            return obj
+        if isinstance(obj, dict):
+            return {k: _convert(v) for k, v in obj.items()}
+        if isinstance(obj, list):
+            return [_convert(i) for i in obj]
+        return obj
+
+    return _convert(results)
+
+
+class TimeMachineRequest(BaseModel):
+    start_date: str
+    end_date: str
+    kb_freeze_date: str | None = None
+
+
+@app.post("/api/timemachine/run")
+def run_timemachine(req: TimeMachineRequest):
+    """Run TimeMachine replay over a date range and cache the result."""
+    cache_path = _replay_cache_path(req.start_date, req.end_date)
+    try:
+        from charting.time_machine import TimeMachine
+        tm = TimeMachine("BANKNIFTY")
+        results = tm.replay(req.start_date, req.end_date)
+        safe_results = _serialize_replay_results(results)
+
+        _CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        with open(cache_path, "w") as f:
+            json.dump(safe_results, f, indent=2, default=str)
+
+        return {"status": "ok", "start_date": req.start_date, "end_date": req.end_date, "results": safe_results}
+    except Exception as e:
+        return {"status": "error", "reason": str(e), "start_date": req.start_date, "end_date": req.end_date}
+
+
+@app.get("/api/timemachine/results/{start_date}/{end_date}")
+def get_timemachine_results(start_date: str, end_date: str):
+    """Return cached replay results if available."""
+    cache_path = _replay_cache_path(start_date, end_date)
+    if not cache_path.exists():
+        return {"status": "not_found", "start_date": start_date, "end_date": end_date, "results": None}
+    try:
+        with open(cache_path) as f:
+            results = json.load(f)
+        return {"status": "ok", "start_date": start_date, "end_date": end_date, "results": results}
+    except Exception as e:
+        return {"status": "error", "reason": str(e), "start_date": start_date, "end_date": end_date}
+
+
+@app.get("/api/timemachine/replay-day/{date}")
+def replay_single_day(date: str):
+    """Run a single-day replay and return a detailed decision log."""
+    try:
+        from charting.time_machine import TimeMachine
+        tm = TimeMachine("BANKNIFTY")
+        results = tm.replay(date, date)
+        safe_results = _serialize_replay_results(results)
+
+        # Check if no data was found for the date
+        summary = safe_results.get("summary", {})
+        if summary.get("trading_days", 0) == 0:
+            return {
+                "status": "error",
+                "reason": f"No market data available for {date}. CSV data covers 2005-2024. "
+                          f"Run 'python scripts/fetch_dhan_history.py' to fetch recent data from Dhan API.",
+                "date": date,
+            }
+
+        return {"status": "ok", "date": date, "results": safe_results}
+    except Exception as e:
+        return {"status": "error", "reason": str(e), "date": date}
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Full Day Agent Simulation
+# ──────────────────────────────────────────────────────────────────────────────
+
+class FullDayTestRequest(BaseModel):
+    date: str
+    kb_freeze: bool = True
+
+
+@app.post("/api/simulate-day")
+def simulate_full_day(req: FullDayTestRequest):
+    """Simulate a full trading day with all agents communicating.
+
+    1. Learner sends KB context (strategies, behaviors, risk rules)
+    2. Charting runs the Time Machine replay
+    3. Trader processes the replay results and makes decisions
+    4. Builder evaluates strategy performance and suggests improvements
+
+    All communication happens via the MessageBus inbox system.
+    """
+    from charting.time_machine import TimeMachine
+    from brain.messages import MessageBus
+    from kb.reader import KBReader
+
+    bus = MessageBus()
+    date = req.date
+
+    # --- Step 1: Learner provides KB context ---
+    try:
+        kb = KBReader("BANKNIFTY")
+        strategies = kb.get("strategies", [])
+        behaviors = kb.get("behaviors", [])
+        risk_rules = kb.get("risk", {})
+    except Exception:
+        strategies, behaviors, risk_rules = [], [], {}
+
+    bus.send("learner", "trader", "day_briefing",
+             subject=f"KB briefing for {date}",
+             body={"date": date, "strategies_count": len(strategies),
+                   "behaviors_count": len(behaviors),
+                   "risk_rules": risk_rules},
+             priority="high")
+
+    bus.send("learner", "charting", "replay_request",
+             subject=f"Run replay for {date}",
+             body={"date": date, "kb_freeze": req.kb_freeze})
+
+    # --- Step 2: Charting runs Time Machine ---
+    try:
+        tm = TimeMachine("BANKNIFTY")
+        freeze_date = date if req.kb_freeze else None
+        results = tm.replay(date, date, kb_freeze_date=freeze_date, verbose=True)
+
+        safe_results = _serialize_replay_results(results)
+    except Exception as e:
+        return {"status": "error", "reason": f"Time Machine failed: {e}"}
+
+    summary = safe_results.get("summary", {})
+    daily = safe_results.get("daily_results", [{}])[0] if safe_results.get("daily_results") else {}
+
+    # --- Step 3: Charting reports to Trader ---
+    bus.send("charting", "trader", "replay_complete",
+             subject=f"Replay done for {date}: {summary.get('total_trades', 0)} trades",
+             body={"date": date, "trades": summary.get("total_trades", 0),
+                   "win_rate": summary.get("win_rate", 0),
+                   "pnl": summary.get("total_pnl", 0),
+                   "direction_flow": [s.get("direction") for s in daily.get("confluence_snapshots", [])[:5]]},
+             priority="high")
+
+    # --- Step 4: Trader processes results ---
+    trade_count = summary.get("total_trades", 0)
+    pnl = summary.get("total_pnl", 0)
+    trader_assessment = "profitable" if pnl > 0 else ("breakeven" if pnl == 0 else "loss")
+
+    bus.send("trader", "builder", "day_review",
+             subject=f"Day {date} review: {trader_assessment} ({trade_count} trades, PnL={pnl:,.0f})",
+             body={"date": date, "assessment": trader_assessment,
+                   "trades": trade_count, "pnl": pnl,
+                   "win_rate": summary.get("win_rate", 0),
+                   "strategy_breakdown": summary.get("strategy_breakdown", {})},
+             priority="normal")
+
+    # --- Step 5: Builder evaluates ---
+    bus.send("builder", "learner", "performance_feedback",
+             subject=f"Strategy performance for {date}",
+             body={"date": date, "strategies_used": list(summary.get("strategy_breakdown", {}).keys()),
+                   "overall_pnl": pnl, "suggestions": []})
+
+    return {
+        "status": "ok",
+        "date": date,
+        "results": safe_results,
+        "agent_messages": {
+            "learner_to_trader": f"KB briefing sent ({len(strategies)} strategies)",
+            "charting_to_trader": f"Replay complete: {trade_count} trades",
+            "trader_to_builder": f"Day review: {trader_assessment}",
+            "builder_to_learner": "Performance feedback sent",
+        },
+    }
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Dhan Data Fetch
+# ──────────────────────────────────────────────────────────────────────────────
+
+@app.post("/api/fetch-dhan-data")
+def fetch_dhan_data(years: int = 5):
+    """Fetch historical BankNifty data from Dhan API and save to CSV."""
+    try:
+        from scripts.fetch_dhan_history import fetch_daily_history, merge_with_existing
+        from data.dhan_client import DhanClient
+
+        client = DhanClient()
+        if not client.is_configured():
+            return {"status": "error", "reason": "Dhan API credentials not configured in config/.env"}
+
+        daily_df = fetch_daily_history(client, years)
+        if daily_df.empty:
+            return {"status": "error", "reason": "No data returned from Dhan API"}
+
+        csv_path = str(_ROOT / "data" / "raw" / "bank-nifty-1d-data.csv")
+        merged = merge_with_existing(daily_df, csv_path)
+        merged.to_csv(csv_path, index=False)
+
+        return {
+            "status": "ok",
+            "rows_fetched": len(daily_df),
+            "total_rows": len(merged),
+            "csv_path": csv_path,
+        }
+    except Exception as e:
+        return {"status": "error", "reason": str(e)}
+
+
+@app.get("/api/data-range")
+def get_data_range():
+    """Return the date range available in CSV data."""
+    try:
+        daily = _load_daily()
+        if daily.empty:
+            return {"status": "ok", "min_date": None, "max_date": None, "rows": 0}
+        return {
+            "status": "ok",
+            "min_date": str(daily["Date"].min().date()),
+            "max_date": str(daily["Date"].max().date()),
+            "rows": len(daily),
+        }
+    except Exception as e:
+        return {"status": "error", "reason": str(e)}

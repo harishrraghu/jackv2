@@ -74,7 +74,7 @@ class AIRetrospectiveAnalyzer:
         
         md_lines.append("## 1. High-Level Overview")
         md_lines.append(f"- **Total Trades Analyzed**: {total_trades}")
-        md_lines.append(f"- **Total Net P&L**: ₹{total_pnl_all:,.2f}")
+        md_lines.append(f"- **Total Net P&L**: Rs{total_pnl_all:,.2f}")
         md_lines.append("")
 
         md_lines.append("## 2. Strategy Performance by Market Regime")
@@ -87,7 +87,7 @@ class AIRetrospectiveAnalyzer:
             win_pct = (w / total) * 100 if total > 0 else 0
             pnl = stats["total_pnl"]
             pnl_color = "🟢" if pnl >= 0 else "🔴"
-            md_lines.append(f"| {key} | {w}W / {l}L | {win_pct:.1f}% | {pnl_color} ₹{pnl:,.0f} |")
+            md_lines.append(f"| {key} | {w}W / {l}L | {win_pct:.1f}% | {pnl_color} Rs{pnl:,.0f} |")
         md_lines.append("")
 
         md_lines.append("## 3. Strategy Performance by Morning Gap Type")
@@ -100,7 +100,7 @@ class AIRetrospectiveAnalyzer:
             win_pct = (w / total) * 100 if total > 0 else 0
             pnl = stats["total_pnl"]
             pnl_color = "🟢" if pnl >= 0 else "🔴"
-            md_lines.append(f"| {key} | {w}W / {l}L | {win_pct:.1f}% | {pnl_color} ₹{pnl:,.0f} |")
+            md_lines.append(f"| {key} | {w}W / {l}L | {win_pct:.1f}% | {pnl_color} Rs{pnl:,.0f} |")
         md_lines.append("")
 
         md_lines.append("## 4. Pending AI Decisions & Action Loop")

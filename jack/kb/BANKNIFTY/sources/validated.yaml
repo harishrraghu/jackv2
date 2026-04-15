@@ -1,0 +1,15 @@
+# Validated Sources — confirmed by backtest
+# Last updated: 2026-04-14
+validated: []
+
+# Format:
+# - source_id: "src_YYYYMMDD_NNN"
+#   type: "pdf|youtube|blog|book|api"
+#   title: "Source title"
+#   url_or_path: "path or URL"
+#   claims_extracted: 5
+#   claims_validated: 3
+#   validation_date: "YYYY-MM-DD"
+#   patterns_added:
+#     - "pattern_id_1"
+#     - "pattern_id_2"

@@ -1,38 +1,35 @@
 data:
-  base_path: "./data/raw/"
+  base_path: ./data/raw/
+  file_pattern: bank-nifty-{timeframe}-data.csv
   timeframes:
-    - "1d"
-    - "2h"
-    - "1h"
-    - "15m"
-    - "5m"
-    - "1m"
-  file_pattern: "bank-nifty-{timeframe}-data.csv"
-
+  - 1d
+  - 2h
+  - 1h
+  - 15m
+  - 5m
+  - 1m
+market:
+  close_time: '15:30'
+  instrument: BANKNIFTY
+  lot_size: 15
+  open_time: 09:15
 splits:
-  train:
-    start: "2015-01-01"
-    end: "2020-12-31"
-  test:
-    start: "2021-01-01"
-    end: "2022-12-31"
   holdout:
-    start: "2023-01-01"
-    end: "2024-04-12"
-
+    end: '2024-04-12'
+    start: '2023-01-01'
+  test:
+    end: '2026-04-14'
+    start: '2021-04-14'
+  train:
+    end: '2020-12-31'
+    start: '2015-01-01'
 trading:
+  brokerage_pct: 0.03
   initial_capital: 1000000
-  max_risk_per_trade_pct: 0.5
   max_daily_drawdown_pct: 2.0
+  max_risk_per_trade_pct: 1.5
   max_total_drawdown_pct: 25.0
   max_trades_per_day: 2
-  brokerage_pct: 0.03
-  stt_sell_pct: 0.0125  # Futures STT rate (not equity delivery 0.025%)
   slippage_ticks: 1
+  stt_sell_pct: 0.0125
   tick_size: 0.05
-
-market:
-  open_time: "09:15"
-  close_time: "15:30"
-  instrument: "BANKNIFTY"
-  lot_size: 15

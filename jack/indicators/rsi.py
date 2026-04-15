@@ -49,7 +49,7 @@ def compute(df: pd.DataFrame, **params) -> pd.DataFrame:
     rs = avg_gain / avg_loss.replace(0, np.nan)
     df["RSI"] = 100 - (100 / (1 + rs))
 
-    # Fill NaN RSI where avg_loss is 0 (all gains → RSI = 100)
+    # Fill NaN RSI where avg_loss is 0 (all gains -> RSI = 100)
     df.loc[avg_loss == 0, "RSI"] = 100.0
 
     return df

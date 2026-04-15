@@ -1,0 +1,12 @@
+# Disabled Strategies — Turned off and why
+# Last updated: 2026-04-14
+disabled: {}
+
+# Format:
+#   strategy_name:
+#     module: "strategies.xxx"
+#     disabled_date: "YYYY-MM-DD"
+#     reason: "Win rate dropped below 50% in Q1 2024"
+#     last_win_rate: 0.xx
+#     last_period: "YYYY-MM to YYYY-MM"
+#     can_revisit: true/false

@@ -144,13 +144,13 @@ class MonteCarloValidator:
             return
 
         print(f"\n  Shuffle Test ({self.n_simulations:,} simulations):")
-        print(f"    Actual final equity:     ₹{shuffle['actual_final_equity']:,.0f}")
-        print(f"    Mean shuffled equity:    ₹{shuffle['mean_shuffled_equity']:,.0f}")
+        print(f"    Actual final equity:     Rs{shuffle['actual_final_equity']:,.0f}")
+        print(f"    Mean shuffled equity:    Rs{shuffle['mean_shuffled_equity']:,.0f}")
         print(f"    Percentile rank:         {shuffle['percentile_rank']:.1f}%")
         print(f"    p-value:                 {shuffle['p_value']:.4f}")
         print(f"    Actual max drawdown:     {shuffle['actual_max_drawdown']:.2f}%")
         print(f"    95th pct shuffle DD:     {shuffle['worst_shuffled_drawdown_95']:.2f}%")
-        print(f"\n    → {shuffle['interpretation']}")
+        print(f"\n    -> {shuffle['interpretation']}")
 
         bootstrap = self.run_bootstrap_confidence()
         if "error" not in bootstrap:

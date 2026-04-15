@@ -50,6 +50,10 @@ jack/journal/logs/*.json
 .claire/
 .claude/
 
+# Credentials
+jack/config/.env
+.env
+
 # Misc
 *.log
 *.bak

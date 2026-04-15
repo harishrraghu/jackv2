@@ -1,0 +1,39 @@
+# Knowledge Base: Event Calendar Risk Rules
+# Last updated: 2026-04-14
+
+events:
+  rbi_policy:
+    impact: 5
+    action: "no_trade_30min_around"
+    size_multiplier: 0.5
+    notes: "No new trades 30 min before/after RBI announcement"
+
+  union_budget:
+    impact: 5
+    action: "no_trade_day"
+    size_multiplier: 0.0
+    notes: "Do NOT trade on budget day. Too unpredictable."
+
+  us_fed:
+    impact: 4
+    action: "reduce_size"
+    size_multiplier: 0.5
+    notes: "Fed decisions at IST 11:30 PM — affects next day gap"
+
+  gdp_data:
+    impact: 3
+    action: "reduce_size"
+    size_multiplier: 0.7
+    notes: "GDP release can move banking sector"
+
+  bank_results:
+    impact: 3
+    action: "reduce_size"
+    size_multiplier: 0.7
+    notes: "Major bank results (HDFC, ICICI, SBI) move BANKNIFTY"
+
+  elections:
+    impact: 5
+    action: "no_overnight"
+    size_multiplier: 0.3
+    notes: "Election results day — extreme gaps possible"

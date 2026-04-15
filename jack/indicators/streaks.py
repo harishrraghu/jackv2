@@ -24,7 +24,7 @@ def compute(df: pd.DataFrame, **params) -> pd.DataFrame:
     Bull_Streak: count of consecutive days where Close > Open, resets on bearish.
     Bear_Streak: count of consecutive days where Close <= Open, resets on bullish.
 
-    Example: B, B, B, Bear → Bull_Streak = [1,2,3,0], Bear_Streak = [0,0,0,1]
+    Example: B, B, B, Bear -> Bull_Streak = [1,2,3,0], Bear_Streak = [0,0,0,1]
 
     Args:
         df: DataFrame with OHLC data.
