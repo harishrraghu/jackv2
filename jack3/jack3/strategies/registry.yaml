@@ -1,0 +1,155 @@
+strategies:
+
+  first_hour_verdict:
+    description: "Trades the direction confirmed by the first hour (10:00-10:15) move"
+    indicators_needed: ["ema", "rsi", "atr", "vwap", "first_hour"]
+    time_window: "10:15-11:15"
+    regime: ["trending_strong", "trending_weak", "normal"]
+    thresholds:
+      min_fh_move_pct: 0.3
+      min_rsi_bull: 55
+      max_rsi_bear: 45
+      atr_stop_multiplier: 0.5
+      atr_target_multiplier: 2.0
+    risk:
+      atr_stop_multiplier: 0.5
+      atr_target_multiplier: 2.0
+    effectiveness:
+      win_rate_20d: null
+      avg_rr: null
+      best_regime: "trending_strong"
+      total_trades_20d: 0
+      last_updated: null
+
+  gap_fill:
+    description: "Fades an overnight gap expecting mean reversion to previous close"
+    indicators_needed: ["ema", "atr", "vwap", "gap"]
+    time_window: "09:30-10:15"
+    regime: ["normal", "ranging"]
+    thresholds:
+      min_gap_pct: 0.3
+      max_gap_pct: 1.5
+      min_ema_alignment: true
+    risk:
+      atr_stop_multiplier: 0.5
+      gap_fill_target_pct: 0.8
+    effectiveness:
+      win_rate_20d: null
+      avg_rr: null
+      best_regime: "ranging"
+      total_trades_20d: 0
+      last_updated: null
+
+  gap_up_fade:
+    description: "Shorts a large gap-up open expecting rejection from supply zones"
+    indicators_needed: ["ema", "rsi", "atr", "gap", "bbands"]
+    time_window: "09:30-10:15"
+    regime: ["normal", "ranging"]
+    thresholds:
+      min_gap_pct: 0.5
+      max_rsi: 80
+      bb_upper_breach: true
+    risk:
+      atr_stop_multiplier: 0.6
+      atr_target_multiplier: 1.5
+    effectiveness:
+      win_rate_20d: null
+      avg_rr: null
+      best_regime: "ranging"
+      total_trades_20d: 0
+      last_updated: null
+
+  streak_fade:
+    description: "Fades multi-day directional streaks expecting mean reversion"
+    indicators_needed: ["ema", "rsi", "atr", "streaks"]
+    time_window: "09:30-10:30"
+    regime: ["normal", "trending_weak"]
+    thresholds:
+      min_streak_days: 3
+      rsi_overbought: 70
+      rsi_oversold: 30
+    risk:
+      atr_stop_multiplier: 0.5
+      atr_target_multiplier: 1.5
+    effectiveness:
+      win_rate_20d: null
+      avg_rr: null
+      best_regime: "normal"
+      total_trades_20d: 0
+      last_updated: null
+
+  bb_squeeze:
+    description: "Trades breakout after Bollinger Band squeeze (low volatility compression)"
+    indicators_needed: ["bbands", "atr", "adx", "vwap"]
+    time_window: "11:15-14:00"
+    regime: ["squeeze", "ranging"]
+    thresholds:
+      min_squeeze_periods: 5
+      min_adx: 20
+      bb_width_threshold: 0.005
+    risk:
+      atr_stop_multiplier: 0.5
+      atr_target_multiplier: 2.5
+    effectiveness:
+      win_rate_20d: null
+      avg_rr: null
+      best_regime: "squeeze"
+      total_trades_20d: 0
+      last_updated: null
+
+  vwap_reversion:
+    description: "Buys/sells when price deviates significantly from VWAP expecting reversion"
+    indicators_needed: ["vwap", "rsi", "atr"]
+    time_window: "11:15-14:30"
+    regime: ["ranging", "normal"]
+    thresholds:
+      min_vwap_deviation_pct: 0.5
+      max_rsi_long: 45
+      min_rsi_short: 55
+    risk:
+      atr_stop_multiplier: 0.5
+      vwap_target: true
+    effectiveness:
+      win_rate_20d: null
+      avg_rr: null
+      best_regime: "ranging"
+      total_trades_20d: 0
+      last_updated: null
+
+  theta_harvest:
+    description: "Sells options when IV is high and range-bound market expected"
+    indicators_needed: ["bbands", "adx", "atr", "vwap"]
+    time_window: "09:30-11:00"
+    regime: ["ranging", "squeeze"]
+    thresholds:
+      max_adx: 25
+      min_iv_percentile: 60
+      bb_width_max: 0.01
+    risk:
+      premium_target_pct: 0.5
+      max_loss_multiplier: 2.0
+    effectiveness:
+      win_rate_20d: null
+      avg_rr: null
+      best_regime: "squeeze"
+      total_trades_20d: 0
+      last_updated: null
+
+  afternoon_breakout:
+    description: "Trades afternoon breakout from morning range after dead zone consolidation"
+    indicators_needed: ["ema", "atr", "vwap", "adx", "orb"]
+    time_window: "13:15-15:00"
+    regime: ["trending_strong", "trending_weak", "normal"]
+    thresholds:
+      min_range_consolidation_bars: 4
+      min_adx: 20
+      orb_break_required: true
+    risk:
+      atr_stop_multiplier: 0.5
+      atr_target_multiplier: 2.0
+    effectiveness:
+      win_rate_20d: null
+      avg_rr: null
+      best_regime: "trending_strong"
+      total_trades_20d: 0
+      last_updated: null

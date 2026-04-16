@@ -1,0 +1,28 @@
+{
+  "date": "2026-04-06",
+  "bias_assessment": "BULLISH",
+  "day_character": "volatile",
+  "trade": {
+    "action": "ENTER_LONG",
+    "entry_time": "10:55",
+    "entry_price": 51603,
+    "stop_loss": 51525,
+    "target": 51948,
+    "risk_pts": 78,
+    "reward_pts": 345,
+    "rr_ratio": 4.42,
+    "exit_time": "12:45",
+    "exit_price": 51948,
+    "outcome": "target_hit",
+    "pnl_pts": 345
+  },
+  "key_levels": {
+    "support": 51525,
+    "resistance": 52705,
+    "vwap_at_entry": 51489
+  },
+  "what_worked": "Long entry on a candle where price reclaimed EMA20 and RSI crossed 60.",
+  "what_failed": "None \u2013 stop fit within the 40\u2011150 point rule using the candle\u2019s low.",
+  "lesson": "When price regains EMA20 after an intraday low, look for a short\u2011term pull\u2011back to enter.",
+  "confidence": 0.81
+}

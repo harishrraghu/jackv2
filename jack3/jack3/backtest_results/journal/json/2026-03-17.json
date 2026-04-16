@@ -1,0 +1,28 @@
+{
+  "date": "2026-03-17",
+  "bias_assessment": "NEUTRAL",
+  "day_character": "trending",
+  "trade": {
+    "action": "ENTER_LONG",
+    "entry_time": "13:00",
+    "entry_price": 54512,
+    "stop_loss": 54424,
+    "target": 54644,
+    "risk_pts": 88,
+    "reward_pts": 132,
+    "rr_ratio": 1.5,
+    "exit_time": "14:05",
+    "exit_price": 54644,
+    "outcome": "target_hit",
+    "pnl_pts": 132
+  },
+  "key_levels": {
+    "support": 54424,
+    "resistance": 54644,
+    "vwap_at_entry": 54376
+  },
+  "what_worked": "A clear up\u2011trend with rising RSI and EMA20 above price; breakout above 54500 gave a tight stop at the prior low (54424).",
+  "what_failed": "None \u2013 the trade fit all rule constraints.",
+  "lesson": "Look for low\u2011risk long entries just before the 13:30 cutoff when the up\u2011trend is already in motion.",
+  "confidence": 0.82
+}

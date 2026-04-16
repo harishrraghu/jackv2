@@ -1,0 +1,68 @@
+{
+  "date": "2026-04-16",
+  "thesis": {
+    "direction": "BULLISH",
+    "confidence": 0.62,
+    "reasoning": "The overall bias is bullish driven by India's retail inflation hitting a 12-month low and a positive US market close (S&P 500 +0.80%), despite a flat GIFT Nifty and rising crude oil.",
+    "key_factors": [
+      "India retail inflation 4.75%",
+      "S&P 500 up 0.80%",
+      "VIX at 18.0"
+    ],
+    "suggested_strategy": "first_hour_verdict",
+    "risk_note": "WPI Inflation data release at 12:00 PM and VIX at 18.0 suggests high intraday volatility.",
+    "expected_range_pts": 450,
+    "bias_entry_after": "10:15"
+  },
+  "thesis_accuracy": "0/1_correct",
+  "trades": [
+    {
+      "strategy": "ai_direct",
+      "direction": "SHORT",
+      "entry_price": 56511.0,
+      "exit_price": 56549.25,
+      "stop_loss": 56626.0,
+      "target": 56338.0,
+      "quantity": 30,
+      "entry_time": "11:05",
+      "entry_date": null,
+      "exit_time": "13:35",
+      "exit_date": null,
+      "exit_reason": "ai_exit",
+      "gross_pnl": -1147.5,
+      "costs": {
+        "brokerage_entry": 508.6,
+        "brokerage_exit": 508.94,
+        "stt": 211.92,
+        "slippage": 3.0,
+        "stamp_duty": 50.86,
+        "gst": 183.16,
+        "total_costs": 1466.48
+      },
+      "net_pnl": -2613.98,
+      "confidence": 0.75,
+      "reason": "Price below VWAP and EMA_20 with RSI 51.26 < 52. Thesis flipped bearish as per override.",
+      "metadata": {},
+      "order_id": "PAPER_000001"
+    }
+  ],
+  "tick_decisions_count": 76,
+  "daily_summary": {
+    "total_pnl": -2613.98,
+    "trades_taken": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0
+  },
+  "capital": {
+    "current_capital": 997386.02,
+    "peak_capital": 1000000.0,
+    "daily_pnl": -2613.98,
+    "trades_today": 1,
+    "has_position": false,
+    "drawdown": {
+      "current_drawdown_pct": 0.2614,
+      "daily_drawdown_pct": 0.2621
+    }
+  }
+}

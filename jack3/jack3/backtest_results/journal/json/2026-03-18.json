@@ -1,0 +1,28 @@
+{
+  "date": "2026-03-18",
+  "bias_assessment": "BULLISH",
+  "day_character": "trending",
+  "trade": {
+    "action": "ENTER_LONG",
+    "entry_time": "12:55",
+    "entry_price": 55156,
+    "stop_loss": 55012,
+    "target": 55372,
+    "risk_pts": 144,
+    "reward_pts": 216,
+    "rr_ratio": 1.5,
+    "exit_time": "13:35",
+    "exit_price": 55372,
+    "outcome": "target_hit",
+    "pnl_pts": 216
+  },
+  "key_levels": {
+    "support": 55012,
+    "resistance": 55372,
+    "vwap_at_entry": 54999
+  },
+  "what_worked": "After a consolidation, price broke above the 55000 level; the recent low (55012) gave a proper stop and the move to 55515 provided ample reward.",
+  "what_failed": "None \u2013 entry met all distance and timing constraints.",
+  "lesson": "When a bullish swing is forming mid\u2011session, use the most recent swing low as stop to keep risk tight.",
+  "confidence": 0.78
+}

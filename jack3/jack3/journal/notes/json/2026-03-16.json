@@ -1,0 +1,68 @@
+{
+  "date": "2026-03-16",
+  "thesis": {
+    "direction": "BULLISH",
+    "confidence": 0.68,
+    "reasoning": "Weighted bias of 0.49 and positive HDFC Bank Q1 updates provide a bullish catalyst despite a flat GIFT Nifty open. Rupee strengthening by 1.78% significantly supports banking index sentiment.",
+    "key_factors": [
+      "USD/INR -1.78%",
+      "HDFC Bank Q1 growth",
+      "Weighted bias 0.49"
+    ],
+    "suggested_strategy": "first_hour_verdict",
+    "risk_note": "VIX at 18.7 and Nifty weekly expiry may cause sudden spikes; avoid entries before price discovery.",
+    "expected_range_pts": 450,
+    "bias_entry_after": "10:15"
+  },
+  "thesis_accuracy": "0/1_correct",
+  "trades": [
+    {
+      "strategy": "ai_direct",
+      "direction": "LONG",
+      "entry_price": 53854.0,
+      "exit_price": 53729.399999999994,
+      "stop_loss": 53721.0,
+      "target": 54054.0,
+      "quantity": 30,
+      "entry_time": "11:15",
+      "entry_date": null,
+      "exit_time": "11:50",
+      "exit_date": null,
+      "exit_reason": "ai_exit",
+      "gross_pnl": -3738.0,
+      "costs": {
+        "brokerage_entry": 484.69,
+        "brokerage_exit": 483.56,
+        "stt": 201.49,
+        "slippage": 3.0,
+        "stamp_duty": 48.47,
+        "gst": 174.29,
+        "total_costs": 1395.49
+      },
+      "net_pnl": -5133.49,
+      "confidence": 0.68,
+      "reason": "Price 53854 > VWAP 53752 and EMA 53650. Setup A active with RSI 52.17.",
+      "metadata": {},
+      "order_id": "PAPER_000001"
+    }
+  ],
+  "tick_decisions_count": 72,
+  "daily_summary": {
+    "total_pnl": -5133.49,
+    "trades_taken": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0
+  },
+  "capital": {
+    "current_capital": 994866.51,
+    "peak_capital": 1000000.0,
+    "daily_pnl": -5133.49,
+    "trades_today": 1,
+    "has_position": false,
+    "drawdown": {
+      "current_drawdown_pct": 0.5133,
+      "daily_drawdown_pct": 0.516
+    }
+  }
+}

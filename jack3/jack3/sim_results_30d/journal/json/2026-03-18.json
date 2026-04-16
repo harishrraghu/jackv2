@@ -1,0 +1,38 @@
+{
+  "date": "2026-03-18",
+  "thesis": {
+    "direction": "BULLISH",
+    "confidence": 0.51,
+    "reasoning": "Weighted bias score of 0.51 provides a bullish lean, though flat Gift Nifty at +0.00% and neutral FII data suggest a cautious start. VIX at 0.0 implies no immediate fear but lacks volatility signal.",
+    "key_factors": [
+      "weighted_bias_score 0.51",
+      "gift_nifty_change +0.00%",
+      "india_vix 0.0"
+    ],
+    "suggested_strategy": "first_hour_verdict",
+    "risk_note": "Flat pre-market indicators suggest a range-bound opening; wait for VWAP confirmation before entry.",
+    "expected_range_pts": 300,
+    "bias_entry_after": "10:15"
+  },
+  "thesis_accuracy": "no_trades",
+  "trades": [],
+  "tick_decisions_count": 72,
+  "daily_summary": {
+    "total_pnl": 0,
+    "trades_taken": 0,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0
+  },
+  "capital": {
+    "current_capital": 1000000.0,
+    "peak_capital": 1000000.0,
+    "daily_pnl": 0.0,
+    "trades_today": 0,
+    "has_position": false,
+    "drawdown": {
+      "current_drawdown_pct": 0.0,
+      "daily_drawdown_pct": 0.0
+    }
+  }
+}

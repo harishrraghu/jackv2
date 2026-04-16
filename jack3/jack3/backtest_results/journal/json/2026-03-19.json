@@ -1,0 +1,28 @@
+{
+  "date": "2026-03-19",
+  "bias_assessment": "BULLISH",
+  "day_character": "range_bound",
+  "trade": {
+    "action": "NO_TRADE",
+    "entry_time": null,
+    "entry_price": null,
+    "stop_loss": null,
+    "target": null,
+    "risk_pts": null,
+    "reward_pts": null,
+    "rr_ratio": null,
+    "exit_time": null,
+    "exit_price": null,
+    "outcome": "no_trade",
+    "pnl_pts": null
+  },
+  "key_levels": {
+    "support": null,
+    "resistance": null,
+    "vwap_at_entry": null
+  },
+  "what_worked": "None \u2013 early volatility did not allow a stop within 40\u2011150\u202fpts before 13:30.",
+  "what_failed": "Early highs were too far from subsequent lows to set a compliant stop.",
+  "lesson": "Avoid chasing the initial rally when the price quickly reverses; wait for a clear, tighter setup.",
+  "confidence": 0.6
+}

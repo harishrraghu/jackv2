@@ -1,0 +1,786 @@
+{
+  "2026-03-23": {
+    "09:15": {
+      "action": "WAIT",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.5,
+      "reasoning": "Wait for market open volatility"
+    },
+    "09:20": {
+      "action": "WAIT",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.5,
+      "reasoning": "Wait for market open volatility"
+    },
+    "09:25": {
+      "action": "WAIT",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.5,
+      "reasoning": "Wait for market open volatility"
+    },
+    "09:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data (VWAP, RSI, EMA) missing; entry criteria not met"
+    },
+    "09:35": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "09:40": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "09:45": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "09:50": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "09:55": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "10:00": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "10:05": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "10:10": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "10:15": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "10:20": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "10:25": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "10:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "10:35": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "10:40": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "10:45": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "10:50": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "10:55": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "11:00": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "11:05": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "11:10": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "11:15": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "11:20": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "11:25": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "11:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "11:35": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "11:40": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "11:45": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "11:50": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "11:55": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "12:00": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "12:05": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "12:10": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "12:15": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "12:20": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "12:25": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "12:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "12:35": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "12:40": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "12:45": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "12:50": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "12:55": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "13:00": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "13:05": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "13:10": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "13:15": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "13:20": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "13:25": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "13:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Indicator data missing; entry criteria not met"
+    },
+    "13:35": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Post 13:30; no new entries permitted"
+    },
+    "13:40": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Post 13:30; no new entries permitted"
+    },
+    "13:45": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Post 13:30; no new entries permitted"
+    },
+    "13:50": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Post 13:30; no new entries permitted"
+    },
+    "13:55": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Post 13:30; no new entries permitted"
+    },
+    "14:00": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Post 13:30; no new entries permitted"
+    },
+    "14:05": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Post 13:30; no new entries permitted"
+    },
+    "14:10": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Post 13:30; no new entries permitted"
+    },
+    "14:15": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Post 13:30; no new entries permitted"
+    },
+    "14:20": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Post 13:30; no new entries permitted"
+    },
+    "14:25": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Post 13:30; no new entries permitted"
+    },
+    "14:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Post 13:30; no new entries permitted"
+    },
+    "14:35": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Post 13:30; no new entries permitted"
+    },
+    "14:40": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Post 13:30; no new entries permitted"
+    },
+    "14:45": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Post 13:30; no new entries permitted"
+    },
+    "14:50": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Post 13:30; no new entries permitted"
+    },
+    "14:55": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Post 13:30; no new entries permitted"
+    },
+    "15:00": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Post 13:30; no new entries permitted"
+    },
+    "15:05": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Post 13:30; no new entries permitted"
+    },
+    "15:10": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Post 13:30; no new entries permitted"
+    },
+    "15:15": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Post 13:30; no new entries permitted"
+    },
+    "15:20": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Post 13:30; no new entries permitted"
+    },
+    "15:25": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "Post 13:30; no new entries permitted"
+    }
+  },
+  "2026-03-24": {
+    "09:15": {
+      "action": "WAIT",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Market open period"
+    },
+    "09:20": {
+      "action": "WAIT",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Market open period"
+    },
+    "09:25": {
+      "action": "WAIT",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Market open period"
+    },
+    "09:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "DIVERGENT",
+      "confidence": 0.4,
+      "reasoning": "Missing technical indicators for entry"
+    },
+    "15:25": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.4,
+      "reasoning": "No trades executed due to missing indicator data"
+    }
+  },
+  "2026-03-25": {
+    "09:15": {
+      "action": "WAIT",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Market open period"
+    },
+    "15:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.4,
+      "reasoning": "No trades executed due to missing indicator data"
+    }
+  },
+  "2026-03-27": {
+    "09:15": {
+      "action": "WAIT",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.08,
+      "reasoning": "Market open period"
+    },
+    "15:25": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.5,
+      "reasoning": "No trades executed due to missing indicator data"
+    }
+  },
+  "2026-03-30": {
+    "09:15": {
+      "action": "WAIT",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Market open period"
+    },
+    "15:25": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "CONFIRMED",
+      "confidence": 0.7,
+      "reasoning": "No trades executed due to missing indicator data"
+    }
+  }
+}

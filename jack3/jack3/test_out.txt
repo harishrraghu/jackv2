@@ -1,0 +1,24 @@
+[Backtest] Loading data/banknifty_1month.csv...
+[Backtest] 5 trading days: 2026-03-16 -> 2026-03-20
+[Backtest] Batch size: 5 days per AI call
+[Backtest] Total AI calls: 1
+
+[Backtest] Batch 1/1: 2026-03-16 to 2026-03-20 ...
+  Sending 5 days (376 candles) to AI...
+[AIClient] 429 rate limit -- waiting 15s (attempt 1/6)
+[AIClient] 429 rate limit -- waiting 30s (attempt 2/6)
+[AIClient] 429 rate limit -- waiting 60s (attempt 3/6)
+[AIClient] 429 rate limit -- waiting 120s (attempt 4/6)
+[AIClient] 429 rate limit -- waiting 120s (attempt 5/6)
+[AIClient] 429 rate limit -- waiting 120s (attempt 6/6)
+  ERROR: AI call failed: 'choices'
+
+============================================================
+  BATCH BACKTEST COMPLETE
+============================================================
+  Days analyzed : 0
+  No trades identified by AI across this period.
+
+  Full results: backtest_results/backtest_summary.json
+  Journals:     backtest_results/journal/
+============================================================

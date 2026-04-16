@@ -1,0 +1,28 @@
+{
+  "date": "2026-04-02",
+  "bias_assessment": "BULLISH",
+  "day_character": "volatile",
+  "trade": {
+    "action": "ENTER_LONG",
+    "entry_time": "12:55",
+    "entry_price": 50442,
+    "stop_loss": 50334,
+    "target": 50746,
+    "risk_pts": 108,
+    "reward_pts": 304,
+    "rr_ratio": 2.81,
+    "exit_time": "13:25",
+    "exit_price": 50746,
+    "outcome": "target_hit",
+    "pnl_pts": 304
+  },
+  "key_levels": {
+    "support": 50334,
+    "resistance": 51732,
+    "vwap_at_entry": 50167
+  },
+  "what_worked": "A clear break above EMA20 with RSI >70 signaled strong upside.",
+  "what_failed": "Early low was far away, requiring a wider stop; still within allowed range.",
+  "lesson": "Use the first strong bullish candle after a consolidation as entry point.",
+  "confidence": 0.74
+}

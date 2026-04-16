@@ -1,0 +1,147 @@
+[
+  {
+    "date": "2026-04-07",
+    "trades": [],
+    "thesis": {
+      "direction": "BULLISH",
+      "confidence": 0.6,
+      "reasoning": "Fallback: AI unavailable. Dependent bias = 0.991",
+      "key_factors": [],
+      "suggested_strategy": null,
+      "risk_note": "Low confidence thesis \u2014 AI unavailable. Trade smaller.",
+      "expected_range_pts": 300,
+      "bias_entry_after": "10:15"
+    },
+    "daily_pnl": 0,
+    "capital": {
+      "current_capital": 1000000.0,
+      "peak_capital": 1000000.0,
+      "daily_pnl": 0.0,
+      "trades_today": 0,
+      "has_position": false,
+      "drawdown": {
+        "current_drawdown_pct": 0.0,
+        "daily_drawdown_pct": 0.0
+      }
+    },
+    "wins": 0,
+    "losses": 0,
+    "cumulative_pnl": 0.0
+  },
+  {
+    "date": "2026-04-08",
+    "trades": [],
+    "thesis": {
+      "direction": "NEUTRAL",
+      "confidence": 0.23,
+      "reasoning": "Fallback: AI unavailable. Dependent bias = 0.115",
+      "key_factors": [],
+      "suggested_strategy": null,
+      "risk_note": "Low confidence thesis \u2014 AI unavailable. Trade smaller.",
+      "expected_range_pts": 300,
+      "bias_entry_after": "10:15"
+    },
+    "daily_pnl": 0,
+    "capital": {
+      "current_capital": 1000000.0,
+      "peak_capital": 1000000.0,
+      "daily_pnl": 0.0,
+      "trades_today": 0,
+      "has_position": false,
+      "drawdown": {
+        "current_drawdown_pct": 0.0,
+        "daily_drawdown_pct": 0.0
+      }
+    },
+    "wins": 0,
+    "losses": 0,
+    "cumulative_pnl": 0.0
+  },
+  {
+    "date": "2026-04-09",
+    "trades": [],
+    "thesis": {
+      "direction": "BULLISH",
+      "confidence": 0.6,
+      "reasoning": "Fallback: AI unavailable. Dependent bias = 1.000",
+      "key_factors": [],
+      "suggested_strategy": null,
+      "risk_note": "Low confidence thesis \u2014 AI unavailable. Trade smaller.",
+      "expected_range_pts": 300,
+      "bias_entry_after": "10:15"
+    },
+    "daily_pnl": 0,
+    "capital": {
+      "current_capital": 1000000.0,
+      "peak_capital": 1000000.0,
+      "daily_pnl": 0.0,
+      "trades_today": 0,
+      "has_position": false,
+      "drawdown": {
+        "current_drawdown_pct": 0.0,
+        "daily_drawdown_pct": 0.0
+      }
+    },
+    "wins": 0,
+    "losses": 0,
+    "cumulative_pnl": 0.0
+  },
+  {
+    "date": "2026-04-10",
+    "trades": [],
+    "thesis": {
+      "direction": "BEARISH",
+      "confidence": 0.6,
+      "reasoning": "Fallback: AI unavailable. Dependent bias = -0.841",
+      "key_factors": [],
+      "suggested_strategy": null,
+      "risk_note": "Low confidence thesis \u2014 AI unavailable. Trade smaller.",
+      "expected_range_pts": 300,
+      "bias_entry_after": "10:15"
+    },
+    "daily_pnl": 0,
+    "capital": {
+      "current_capital": 1000000.0,
+      "peak_capital": 1000000.0,
+      "daily_pnl": 0.0,
+      "trades_today": 0,
+      "has_position": false,
+      "drawdown": {
+        "current_drawdown_pct": 0.0,
+        "daily_drawdown_pct": 0.0
+      }
+    },
+    "wins": 0,
+    "losses": 0,
+    "cumulative_pnl": 0.0
+  },
+  {
+    "date": "2026-04-13",
+    "trades": [],
+    "thesis": {
+      "direction": "BULLISH",
+      "confidence": 0.6,
+      "reasoning": "Fallback: AI unavailable. Dependent bias = 1.000",
+      "key_factors": [],
+      "suggested_strategy": null,
+      "risk_note": "Low confidence thesis \u2014 AI unavailable. Trade smaller.",
+      "expected_range_pts": 300,
+      "bias_entry_after": "10:15"
+    },
+    "daily_pnl": 0,
+    "capital": {
+      "current_capital": 1000000.0,
+      "peak_capital": 1000000.0,
+      "daily_pnl": 0.0,
+      "trades_today": 0,
+      "has_position": false,
+      "drawdown": {
+        "current_drawdown_pct": 0.0,
+        "daily_drawdown_pct": 0.0
+      }
+    },
+    "wins": 0,
+    "losses": 0,
+    "cumulative_pnl": 0.0
+  }
+]

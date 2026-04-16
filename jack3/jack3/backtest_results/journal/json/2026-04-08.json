@@ -1,0 +1,28 @@
+{
+  "date": "2026-04-08",
+  "bias_assessment": "BULLISH",
+  "day_character": "trending",
+  "trade": {
+    "action": "ENTER_LONG",
+    "entry_time": "13:30",
+    "entry_price": 55470,
+    "stop_loss": 55421,
+    "target": 55595,
+    "risk_pts": 49,
+    "reward_pts": 125,
+    "rr_ratio": 2.55,
+    "exit_time": "14:35",
+    "exit_price": 55595,
+    "outcome": "target_hit",
+    "pnl_pts": 125
+  },
+  "key_levels": {
+    "support": 55421,
+    "resistance": 55778,
+    "vwap_at_entry": 55237
+  },
+  "what_worked": "Entry on a candle above EMA20 with RSI near 55 and price already above VWAP.",
+  "what_failed": "Stop was tight but met the minimum 40\u2011point rule; price respected it.",
+  "lesson": "In fast\u2011moving markets, a modest stop can still yield high RR if the trend is strong.",
+  "confidence": 0.79
+}

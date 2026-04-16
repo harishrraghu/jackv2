@@ -1,0 +1,34 @@
+{
+  "date": "2026-04-09",
+  "thesis": {
+    "direction": "BULLISH",
+    "confidence": 0.6,
+    "reasoning": "Fallback: AI unavailable. Dependent bias = 1.000",
+    "key_factors": [],
+    "suggested_strategy": null,
+    "risk_note": "Low confidence thesis \u2014 AI unavailable. Trade smaller.",
+    "expected_range_pts": 300,
+    "bias_entry_after": "10:15"
+  },
+  "thesis_accuracy": "no_trades",
+  "trades": [],
+  "tick_decisions_count": 76,
+  "daily_summary": {
+    "total_pnl": 0,
+    "trades_taken": 0,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0
+  },
+  "capital": {
+    "current_capital": 1000000.0,
+    "peak_capital": 1000000.0,
+    "daily_pnl": 0.0,
+    "trades_today": 0,
+    "has_position": false,
+    "drawdown": {
+      "current_drawdown_pct": 0.0,
+      "daily_drawdown_pct": 0.0
+    }
+  }
+}

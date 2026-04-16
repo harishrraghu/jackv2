@@ -1,0 +1,28 @@
+{
+  "date": "2026-03-27",
+  "bias_assessment": "BEARISH",
+  "day_character": "volatile",
+  "trade": {
+    "action": "NO_TRADE",
+    "entry_time": null,
+    "entry_price": null,
+    "stop_loss": null,
+    "target": null,
+    "risk_pts": null,
+    "reward_pts": null,
+    "rr_ratio": null,
+    "exit_time": null,
+    "exit_price": null,
+    "outcome": "no_trade",
+    "pnl_pts": null
+  },
+  "key_levels": {
+    "support": 52211,
+    "resistance": 53292,
+    "vwap_at_entry": null
+  },
+  "what_worked": "",
+  "what_failed": "",
+  "lesson": "Avoid shorting before 13:30 when price is still forming higher lows; wait for a clearer breakdown.",
+  "confidence": 0.58
+}

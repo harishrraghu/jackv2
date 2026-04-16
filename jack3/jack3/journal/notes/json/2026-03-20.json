@@ -1,0 +1,38 @@
+{
+  "date": "2026-03-20",
+  "thesis": {
+    "direction": "BEARISH",
+    "confidence": 0.58,
+    "reasoning": "The weighted bias score of -0.37 and overall bearish bias conflict with the bullish S&P 500 and USDINR data. High VIX of 20.5 suggests caution.",
+    "key_factors": [
+      "Weighted bias -0.37",
+      "India VIX 20.5",
+      "USDINR change -1.80%"
+    ],
+    "suggested_strategy": "first_hour_verdict",
+    "risk_note": "Conflicting signals between global bullishness and domestic bearish bias; VIX above 20 necessitates wider stops.",
+    "expected_range_pts": 520,
+    "bias_entry_after": "10:15"
+  },
+  "thesis_accuracy": "no_trades",
+  "trades": [],
+  "tick_decisions_count": 76,
+  "daily_summary": {
+    "total_pnl": 0,
+    "trades_taken": 0,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0
+  },
+  "capital": {
+    "current_capital": 1000000.0,
+    "peak_capital": 1000000.0,
+    "daily_pnl": 0.0,
+    "trades_today": 0,
+    "has_position": false,
+    "drawdown": {
+      "current_drawdown_pct": 0.0,
+      "daily_drawdown_pct": 0.0
+    }
+  }
+}

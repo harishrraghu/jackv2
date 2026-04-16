@@ -1,0 +1,65 @@
+market:
+  instrument: "BANKNIFTY"
+  lot_size: 15
+  open_time: "09:15"
+  close_time: "15:30"
+  tick_interval_minutes: 5
+  pre_market_start: "08:45"
+
+trading:
+  initial_capital: 1000000
+  max_risk_per_trade_pct: 0.5
+  max_daily_loss_pct: 2.0
+  max_total_drawdown_pct: 25.0
+  max_trades_per_day: 3
+  brokerage_pct: 0.03
+  stt_sell_pct: 0.0125
+  slippage_ticks: 1
+  tick_size: 0.05
+
+dhan:
+  client_id: "1111243898"
+  access_token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJkaGFuIiwicGFydG5lcklkIjoiIiwiZXhwIjoxNzc2Mzk5MzQyLCJpYXQiOjE3NzYzMTI5NDIsInRva2VuQ29uc3VtZXJUeXBlIjoiU0VMRiIsIndlYmhvb2tVcmwiOiIiLCJkaGFuQ2xpZW50SWQiOiIxMTExMjQzODk4In0.aMaltX_wVW2eL61hM4nx9q8zSj1nSVVwGfE4nh8Ms1qM6vr899HNW5rJVtGS4rliSqtStHh6FfTCMEJUS3cg0Q"
+  banknifty_index_id: "25"
+  banknifty_exchange_segment: "IDX_I"
+  banknifty_instrument_type: "INDEX"
+  banknifty_option_segment: "IDX_I"
+  paper_mode: true
+
+ai:
+  intraday_provider: "openai_proxy"
+  nightly_provider: "openai_proxy"
+
+  anthropic:
+    api_key: "${ANTHROPIC_API_KEY}"
+    model: "claude-sonnet-4-6"
+    max_tokens: 2000
+
+  openai_proxy:
+    base_url: "http://localhost:7777/v1"
+    api_key: "my-local-key"
+    model: "gpt-oss-120b-medium"
+    max_tokens: 2000
+
+  claude_code:
+    allowed_tools: "Read,Bash"
+    max_turns: 5
+
+dependents:
+  gift_nifty:   { source: "scrape",     weight: 0.30 }
+  sp500:        { source: "yfinance",   symbol: "^GSPC",    weight: 0.15 }
+  dow_futures:  { source: "yfinance",   symbol: "YM=F",     weight: 0.10 }
+  usd_inr:      { source: "yfinance",   symbol: "USDINR=X", weight: 0.05 }
+  crude_oil:    { source: "yfinance",   symbol: "CL=F",     weight: 0.10 }
+  india_vix:    { source: "yfinance",   symbol: "^INDIAVIX",weight: 0.10 }
+  fii_dii:      { source: "nse_scrape", weight: 0.15 }
+  us_10y_yield: { source: "yfinance",   symbol: "^TNX",     weight: 0.05 }
+
+lab:
+  backtest_lookback_days: 20
+  min_win_rate_to_promote: 55
+  min_trades_to_evaluate: 5
+
+journal:
+  output_dir: "journal/notes"
+  max_notes_in_context: 10

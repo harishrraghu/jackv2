@@ -1,0 +1,96 @@
+
+======================================================================
+  JACK v3  |  BankNifty AI Paper Trading  |  1-Month Simulation Report
+======================================================================
+  Period : 2026-03-27  to  2026-04-13
+  Days   : 10 trading days
+  Model  : gemini-3-flash via local proxy
+  Mode   : Paper (no real orders placed)
+
+--- PERFORMANCE SUMMARY ---
+  Total P&L          : Rs.     5,837  +5,837
+  Total Trades       :          3
+  Win Rate           :      66.7%  (2W / 1L)
+  Avg Win            : Rs.     5,437
+  Avg Loss           : Rs.    -5,038
+  Profit Factor      :       2.16  (> 1.5 = good)
+  Max Drawdown       : Rs.         0
+  Best Day           : Rs.     5,426  (2026-03-30)
+  Worst Day          : Rs.         0  (2026-04-01)
+  Profitable Days    :          2  / 10
+  Loss Days          :          0
+  Flat Days (no trade):         8
+  Thesis Accuracy    :     100.0%  (direction vs actual move)
+  Avg Trades/Active  :       1.5
+
+--- DAY-BY-DAY BREAKDOWN ---
+  Date         Thesis    Conf  Tr   W  Day Move        P&L   Cumulative  Chart
+  ----------------------------------------------------------------------------
+  2026-03-27   B          58%   2   1   -880pts Rs.     411 Rs.       411  [+--------------]
+  2026-03-30   B          58%   1   1  -1125pts Rs.   5,426 Rs.     5,837  [+++++++++++++++]
+  2026-04-01   B          60%   0   0    +92pts Rs.       0 Rs.     5,837  [---------------]
+  2026-04-02   B          60%   0   0   +938pts Rs.       0 Rs.     5,837  [---------------]
+  2026-04-06   B          60%   0   0   +838pts Rs.       0 Rs.     5,837  [---------------]
+  2026-04-07   B          60%   0   0   +447pts Rs.       0 Rs.     5,837  [---------------]
+  2026-04-08   B          60%   0   0   +853pts Rs.       0 Rs.     5,837  [---------------]
+  2026-04-09   B          60%   0   0   -686pts Rs.       0 Rs.     5,837  [---------------]
+  2026-04-10   B          60%   0   0   +747pts Rs.       0 Rs.     5,837  [---------------]
+  2026-04-13   B          60%   0   0   +926pts Rs.       0 Rs.     5,837  [---------------]
+
+--- COMPLETE TRADE LOG ---
+  Date         Dir       Entry    Exit    Move       P&L Exit Reason            Thesis  
+  --------------------------------------------------------------------------------------
+  2026-03-27   SHORT     52751   52584   +167p Rs.  5,449 ai_exit                B       
+  2026-03-27   SHORT     52584   52650    -66p Rs. -5,038 ai_exit                B       
+  2026-03-30   SHORT     51071   50846   +225p Rs.  5,426 target_hit             B       
+
+--- EXIT REASON ANALYSIS ---
+  Reason                     Count   Win%    Avg P&L    Total P&L
+  -----------------------------------------------------------------
+  ai_exit                        2  50.0%  Rs.     205  Rs.      411
+  target_hit                     1 100.0%  Rs.   5,426  Rs.    5,426
+
+--- LONG vs SHORT ANALYSIS ---
+  LONG : No trades
+  SHORT: 3 trades | 66.7% WR | Avg Rs.1,946 | Total Rs.5,837
+
+--- THESIS vs MARKET REALITY ---
+  Date         Thesis    Actual Move Outcome   
+  ---------------------------------------------
+  2026-03-27   BEARISH        -880pts  Correct   
+  2026-03-30   BEARISH       -1125pts  Correct   
+  2026-04-01   BEARISH         +92pts  Wrong     
+  2026-04-02   BEARISH        +938pts  Wrong     
+  2026-04-06   BEARISH        +838pts  Wrong     
+  2026-04-07   BEARISH        +447pts  Wrong     
+  2026-04-08   BEARISH        +853pts  Wrong     
+  2026-04-09   BEARISH        -686pts  Correct   
+  2026-04-10   BEARISH        +747pts  Wrong     
+  2026-04-13   BEARISH        +926pts  Wrong     
+
+--- AI LESSONS LEARNED (from nightly reviews) ---
+   1. [2026-03-27] Enter SHORT trades only when the 5-minute candle closes at least 20 points below the VWAP for repeatable momentum confirmation.
+   2. [2026-03-27] Wait for a 5-minute candle to close below the 20-period EMA with a minimum volume spike of 20% over average before entering SHORT.
+
+--- EQUITY CURVE (cumulative P&L) ---
+  Max: Rs.5,837
+  | +++++++++|
+  |          |
+  |          |
+  |          |
+  |          |
+  |          |
+  |          |
+  |          |
+  |+         |
+  |          |
+  Min: Rs.0
+     2026-03-272026-04-13
+
+--- VERDICT ---
+  PROMISING — Profitable with decent win rate. Needs more data to confirm edge.
+
+  Total P&L    : Rs.5,837 over 10 trading days
+  Win Rate     : 66.7%
+  Profit Factor: 2.16
+  Max Drawdown : Rs.0

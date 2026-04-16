@@ -1,0 +1,28 @@
+{
+  "date": "2026-04-10",
+  "bias_assessment": "BULLISH",
+  "day_character": "volatile",
+  "trade": {
+    "action": "ENTER_LONG",
+    "entry_time": "09:45",
+    "entry_price": 55755,
+    "stop_loss": 55686,
+    "target": 55859,
+    "risk_pts": 69,
+    "reward_pts": 104,
+    "rr_ratio": 1.5,
+    "exit_time": "10:15",
+    "exit_price": 55859,
+    "outcome": "target_hit",
+    "pnl_pts": 104
+  },
+  "key_levels": {
+    "support": 55145,
+    "resistance": 55978,
+    "vwap_at_entry": 55574
+  },
+  "what_worked": "Long entry on a strong 5\u2011min bullish candle after the early session low gave a clean breakout above the candle high.",
+  "what_failed": "RSI showed oversold conditions but did not hinder the move; no false signal observed.",
+  "lesson": "In fast\u2011moving days, use the high of a bullish candle as entry reference and set tight stops at the candle low.",
+  "confidence": 0.81
+}

@@ -1,0 +1,28 @@
+{
+  "date": "2026-03-23",
+  "bias_assessment": "BEARISH",
+  "day_character": "volatile",
+  "trade": {
+    "action": "NO_TRADE",
+    "entry_time": null,
+    "entry_price": null,
+    "stop_loss": null,
+    "target": null,
+    "risk_pts": null,
+    "reward_pts": null,
+    "rr_ratio": null,
+    "exit_time": null,
+    "exit_price": null,
+    "outcome": "no_trade",
+    "pnl_pts": null
+  },
+  "key_levels": {
+    "support": 51324,
+    "resistance": 52665,
+    "vwap_at_entry": null
+  },
+  "what_worked": "",
+  "what_failed": "",
+  "lesson": "When the price action is choppy with no clean breakout and stop\u2011loss distance exceeds limits, avoid taking a trade.",
+  "confidence": 0.6
+}

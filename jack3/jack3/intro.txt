@@ -1,0 +1,393 @@
+  Jack v3 — Complete System Description
+
+  System Overview
+
+  Jack v3 is an AI-powered intraday trading system for BankNifty (NSE index) built in jack3/. It combines 8 technical strategies with an LLM brain that
+  generates a pre-market thesis and re-evaluates every 5 minutes. All AI decisions pass through hard-coded Python validation gates that cannot be bypassed.
+
+  Market context: BankNifty futures, lot size 15, 5-min candles, 09:15–15:30 IST, force-close at 15:15.
+
+  ---
+  Architecture (7 Layers)
+
+  config/settings.yaml     ← Central config (all tunable values here)
+  data/                    ← Market data fetching & normalization
+  indicators/              ← Plugin-based technical analysis (21 indicators)
+  strategies/              ← 8 trading strategies with standard interface
+  brain/                   ← LLM thesis + 5-min tick evaluator
+  engine/                  ← Main loop, risk, state machine, broker, scorer
+  journal/ + lab/          ← Journaling, backtesting, strategy ranking
+
+  ---
+  Configuration (config/settings.yaml)
+
+  Key values:
+
+  ┌────────────────────────────────┬──────────────┬────────────────────────────┐
+  │              Key               │    Value     │           Notes            │
+  ├────────────────────────────────┼──────────────┼────────────────────────────┤
+  │ market.lot_size                │ 15           │ BankNifty lot              │
+  ├────────────────────────────────┼──────────────┼────────────────────────────┤
+  │ trading.initial_capital        │ 1,000,000    │ ₹10L                       │
+  ├────────────────────────────────┼──────────────┼────────────────────────────┤
+  │ trading.max_risk_per_trade_pct │ 0.5          │ 0.5% per trade             │
+  ├────────────────────────────────┼──────────────┼────────────────────────────┤
+  │ trading.max_daily_loss_pct     │ 2.0          │ Daily stop                 │
+  ├────────────────────────────────┼──────────────┼────────────────────────────┤
+  │ trading.max_total_drawdown_pct │ 25.0         │ Total stop                 │
+  ├────────────────────────────────┼──────────────┼────────────────────────────┤
+  │ trading.max_trades_per_day     │ 3            │ Hard cap                   │
+  ├────────────────────────────────┼──────────────┼────────────────────────────┤
+  │ trading.brokerage_pct          │ 0.03         │ Per leg                    │
+  ├────────────────────────────────┼──────────────┼────────────────────────────┤
+  │ trading.stt_sell_pct           │ 0.0125       │ STT on sells               │
+  ├────────────────────────────────┼──────────────┼────────────────────────────┤
+  │ trading.slippage_ticks         │ 1            │ 1 tick = 0.05 pts          │
+  ├────────────────────────────────┼──────────────┼────────────────────────────┤
+  │ dhan.paper_mode                │ true         │ Set false for live         │
+  ├────────────────────────────────┼──────────────┼────────────────────────────┤
+  │ dhan.banknifty_index_id        │ "25"         │ Futures security ID        │
+  ├────────────────────────────────┼──────────────┼────────────────────────────┤
+  │ ai.intraday_provider           │ openai_proxy │ Gemini via cliproxy (fast) │
+  ├────────────────────────────────┼──────────────┼────────────────────────────┤
+  │ ai.nightly_provider            │ claude_code  │ Claude headless (deep)     │
+  ├────────────────────────────────┼──────────────┼────────────────────────────┤
+  │ lab.backtest_lookback_days     │ 20           │ Default backtest window    │
+  └────────────────────────────────┴──────────────┴────────────────────────────┘
+
+  Dependent factors (pre-market bias signals with weights):
+  - Gift Nifty (30%), SP500 (15%), Dow futures (10%), USD/INR (5%), Crude (10%), India VIX (10%), US 10Y (5%), FII/DII (15%)
+  - Produces weighted_bias (-1.0 to +1.0) and bias_direction (BULLISH/BEARISH/NEUTRAL)
+
+  ---
+  Data Layer (data/)
+
+  ┌─────────────────┬───────────────────┬────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │      File       │  Class/Function   │                                                    Purpose                                                     │
+  ├─────────────────┼───────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ dhan_client.py  │ DhanClient        │ High-level Dhan API wrapper. Methods: get_historical_daily(), get_historical_intraday(), get_option_chain(),   │
+  │                 │                   │ get_ltp()                                                                                                      │
+  ├─────────────────┼───────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ dhan_fetcher.py │ DhanFetcher       │ Resumable 5-year historical fetcher. Auto-chunks 90-day API limit. fetch_and_save(from_date, to_date,          │
+  │                 │                   │ output_csv, resume=True)                                                                                       │
+  ├─────────────────┼───────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ dependents.py   │ DependentsFetcher │ Fetches all pre-market signals via yfinance + NSE API. fetch_all() → weighted bias dict                        │
+  ├─────────────────┼───────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ researcher.py   │ MarketResearcher  │ AI-powered news researcher. research() → sentiment + key_events + risk_flags                                   │
+  ├─────────────────┼───────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ normalizer.py   │ Functions         │ Standardizes column names across sources (Close → close, etc.)                                                 │
+  └─────────────────┴───────────────────┴────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  get_historical_intraday signature:
+  get_historical_intraday(security_id, interval=5, days_back=5,
+                          from_date=None, to_date=None,
+                          exchange_segment="NSE_FNO", instrument_type="FUTIDX")
+  Automatically splits into 90-day chunks per Dhan v2 API limit.
+
+  ---
+  Indicators Layer (indicators/)
+
+  Plugin pattern: Every file must have:
+  1. METADATA dict with: name, display_name, params, output_columns, timeframes
+  2. compute(df, **params) → DataFrame with new columns appended
+
+  Registry (indicators/registry.py):
+  - IndicatorRegistry(indicators_dir) — auto-discovers all plugins
+  - compute(name, df, **params) → DataFrame
+  - compute_all(df, indicator_list, params_override) → apply multiple sequentially
+
+  21 implemented indicators:
+
+  ┌────────────┬──────────────────────────────────────────────┬─────────────────────────────────────────────────────────────────────────────────┐
+  │ Indicator  │                Output Columns                │                                    Key Notes                                    │
+  ├────────────┼──────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────┤
+  │ ema        │ EMA_{period}                                 │ period=9 default                                                                │
+  ├────────────┼──────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────┤
+  │ rsi        │ RSI                                          │ Wilder's smoothing, period=14                                                   │
+  ├────────────┼──────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────┤
+  │ atr        │ ATR, ATR_Pct                                 │ True range, period=14                                                           │
+  ├────────────┼──────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────┤
+  │ sma        │ SMA_{period}                                 │ Rolling mean, period=20                                                         │
+  ├────────────┼──────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────┤
+  │ bbands     │ BB_Upper, BB_Mid, BB_Lower, BB_Width, BB_Pct │ period=20, std=2.0                                                              │
+  ├────────────┼──────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────┤
+  │ macd       │ MACD, MACD_Signal, MACD_Hist                 │ 12/26/9                                                                         │
+  ├────────────┼──────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────┤
+  │ adx        │ ADX, PDI, MDI                                │ Wilder smoothing; >25=trending                                                  │
+  ├────────────┼──────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────┤
+  │ stochastic │ Stoch_K, Stoch_D                             │ k=14, d=3                                                                       │
+  ├────────────┼──────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────┤
+  │ adr        │ ADR, ADR_Pct                                 │ Average daily range, period=20                                                  │
+  ├────────────┼──────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────┤
+  │ vwap       │ VWAP, VWAP_Upper, VWAP_Lower                 │ Resets daily; TP-based                                                          │
+  ├────────────┼──────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────┤
+  │ supertrend │ Supertrend, Supertrend_Direction             │ period=10, mult=3.0; popular in Indian markets                                  │
+  ├────────────┼──────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────┤
+  │ gap        │ Gap_Pts, Gap_Pct, Gap_Type                   │ Types: large_up/small_up/flat/small_down/large_down                             │
+  ├────────────┼──────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────┤
+  │ orb        │ ORB_High, ORB_Low, ORB_Range, ORB_Bullish    │ Opening range (first 15m)                                                       │
+  ├────────────┼──────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────┤
+  │ first_hour │ FH_Return, FH_Range, FH_Direction, FH_Strong │ FH_Strong=True if                                                               │
+  ├────────────┼──────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────┤
+  │ pivots     │ PP, R1–R3, S1–S3                             │ Uses PREVIOUS day's HLC                                                         │
+  ├────────────┼──────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────┤
+  │ regime     │ Regime, Regime_Score                         │ trending_strong(5)/trending_weak(4)/volatile(4)/normal(3)/ranging(2)/squeeze(1) │
+  ├────────────┼──────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────┤
+  │ hurst      │ Hurst                                        │ R/S method; >0.5=trending, <0.5=mean-reverting                                  │
+  ├────────────┼──────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────┤
+  │ streaks    │ Bull_Streak, Bear_Streak                     │ Consecutive day counts                                                          │
+  └────────────┴──────────────────────────────────────────────┴─────────────────────────────────────────────────────────────────────────────────┘
+
+  ---
+  Strategies Layer (strategies/)
+
+  Base classes (strategies/base.py):
+  @dataclass
+  class TradeSignal:
+      strategy_name, direction, entry_price, stop_loss, target, confidence, reason, metadata
+
+  @dataclass
+  class ExitSignal:
+      should_exit, exit_price, reason
+
+  class Strategy(ABC):
+      def check_entry(day_data, lookback, indicators, current_time, filters) → Optional[TradeSignal]
+      def check_exit(position, day_data, current_time, current_price) → ExitSignal
+      def score(signal, filters) → float  # 0.0–2.0
+
+  8 strategies:
+
+  ┌────────────────────┬───────────────────────┬────────────────────────────────────────────────────────┬──────────────┐
+  │      Strategy      │         File          │                         Logic                          │ Entry Window │
+  ├────────────────────┼───────────────────────┼────────────────────────────────────────────────────────┼──────────────┤
+  │ first_hour_verdict │ first_hour_verdict.py │ Trade direction of first strong 1h candle (>0.4% move) │ 10:15–11:15  │
+  ├────────────────────┼───────────────────────┼────────────────────────────────────────────────────────┼──────────────┤
+  │ gap_up_fade        │ gap_up_fade.py        │ Short large gap-ups (>0.75%); mean-reversion           │ 09:30–10:15  │
+  ├────────────────────┼───────────────────────┼────────────────────────────────────────────────────────┼──────────────┤
+  │ bb_squeeze         │ bb_squeeze.py         │ Trade BB squeeze breakouts during lunch                │ 12:15–14:15  │
+  ├────────────────────┼───────────────────────┼────────────────────────────────────────────────────────┼──────────────┤
+  │ gap_fill           │ gap_fill.py           │ Fill intraday gaps                                     │ 09:30–10:15  │
+  ├────────────────────┼───────────────────────┼────────────────────────────────────────────────────────┼──────────────┤
+  │ streak_fade        │ streak_fade.py        │ Fade multi-day streaks                                 │ Morning      │
+  ├────────────────────┼───────────────────────┼────────────────────────────────────────────────────────┼──────────────┤
+  │ vwap_reversion     │ vwap_reversion.py     │ Mean-revert to VWAP in ranging markets                 │ 11:15–13:15  │
+  ├────────────────────┼───────────────────────┼────────────────────────────────────────────────────────┼──────────────┤
+  │ theta_harvest      │ theta_harvest.py      │ Harvest options theta decay                            │ 09:30–10:15  │
+  ├────────────────────┼───────────────────────┼────────────────────────────────────────────────────────┼──────────────┤
+  │ afternoon_breakout │ afternoon_breakout.py │ Trade afternoon momentum                               │ 13:15–15:00  │
+  └────────────────────┴───────────────────────┴────────────────────────────────────────────────────────┴──────────────┘
+
+  Strategy constraints (hard rules):
+  - Max 5 tunable parameters per strategy (anti-overfitting)
+  - Stop loss must be ≤ 1.5% from entry
+  - Reward:Risk ratio must exceed 1.0
+
+  ---
+  AI / Brain Layer (brain/)
+
+  ai_client.py — AIClient(provider, config)
+
+  Three pluggable backends:
+  1. anthropic: Direct Claude API (anthropic SDK)
+  2. openai_proxy: OpenAI-compatible endpoint (Gemini via cliproxy at localhost:8080)
+  3. claude_code: Claude headless subprocess (claude -p <prompt> --output-format json)
+
+  Factory: create_ai_client(settings, mode="intraday"|"nightly") → AIClient
+
+  thesis.py — ThesisGenerator
+
+  Called at 08:55 AM. Returns:
+  {
+    "direction": "BULLISH"|"BEARISH"|"NEUTRAL",
+    "confidence": float,           # 0.0–1.0
+    "reasoning": str,
+    "key_factors": [str],
+    "suggested_strategy": str,
+    "risk_note": str,
+    "expected_range_pts": int,
+    "bias_entry_after": "HH:MM",
+  }
+  Inputs: dependents dict + news research + last 5 days' journal + strategy rankings. Falls back to rule-based thesis if AI unavailable (max confidence:
+  0.6).
+
+  evaluator.py — Evaluator
+
+  Called every 5 minutes. Returns:
+  {
+    "thesis_update": "CONFIRMED"|"WEAKENING"|"FLIPPED"|"NEUTRAL",
+    "confidence": float,
+    "action": "HOLD"|"ENTER_LONG"|"ENTER_SHORT"|"EXIT"|"TIGHTEN_SL"|"WAIT",
+    "entry_price": float,
+    "stop_loss": float,
+    "target": float,
+    "reasoning": str,    # max 200 chars
+  }
+
+  prompts.py — Prompt Templates
+
+  - pre_market_thesis_prompt(dependents, research, recent_journal, strategy_rankings)
+  - five_min_evaluation_prompt(thesis, candle, option_chain, position, indicators, time, daily_pnl)
+  - journal_entry_prompt(trade, market_context)
+  - nightly_review_prompt(journal_entries, strategy_performance)
+
+  ---
+  Engine Layer (engine/)
+
+  loop.py — JackMainLoop (MAIN ORCHESTRATOR)
+
+  Daily execution flow:
+  08:45  run_pre_market()         → fetch dependents, research, generate thesis
+  09:15  run_market_hours()       → tick loop every 5 min
+           _run_one_tick()        → fetch candles → indicators → check SL/target → AI eval → validate → execute
+  15:15  force_close_position()   → all positions closed
+  15:35  run_post_market()        → journal, optional AI review
+
+  Validation gates in _attempt_entry() (AI cannot bypass):
+  1. Must be in entry-allowed trading phase
+  2. No entries after 15:00
+  3. SL capped to 1.5% max from entry
+  4. Reward:Risk > 1.0 required
+  5. risk.can_trade() check (daily loss, drawdown, trade count)
+
+  Simulation mode: run_simulation_day(date, day_candles_df, pre_market_context) — reads from pre-loaded DataFrame instead of broker API. Used by historical
+  simulation script.
+
+  risk.py — RiskManager
+
+  Position sizing formula:
+  risk_amount = capital × max_risk_pct / 100
+  quantity = floor(risk_amount / stop_distance / lot_size) × lot_size
+  Capped at 30 lots. Min stop distance: 50 points.
+
+  Full cost model per round-trip:
+  entry_brokerage = entry_price × qty × 0.03% ÷ 100
+  exit_brokerage  = exit_price  × qty × 0.03% ÷ 100
+  stt             = exit_price  × qty × 1.25% ÷ 100  (sells only)
+  gst             = (entry + exit brokerage) × 18%
+  slippage        = 1 tick × 0.05 × qty
+  total ≈ 0.4–0.5% of position per round-trip
+
+  state_machine.py — StateMachine
+
+  7 trading phases with eligible strategies per phase:
+
+  ┌──────────────────────┬─────────────┬───────────────────────────────────────────────────┐
+  │        Phase         │    Time     │                  Allowed Actions                  │
+  ├──────────────────────┼─────────────┼───────────────────────────────────────────────────┤
+  │ pre_market           │ 09:00–09:15 │ observe only                                      │
+  ├──────────────────────┼─────────────┼───────────────────────────────────────────────────┤
+  │ opening_observation  │ 09:15–09:30 │ observe only (record ORB)                         │
+  ├──────────────────────┼─────────────┼───────────────────────────────────────────────────┤
+  │ morning_setups       │ 09:30–10:15 │ gap_fill, gap_up_fade, streak_fade, theta_harvest │
+  ├──────────────────────┼─────────────┼───────────────────────────────────────────────────┤
+  │ first_hour_execution │ 10:15–11:15 │ first_hour_verdict                                │
+  ├──────────────────────┼─────────────┼───────────────────────────────────────────────────┤
+  │ dead_zone            │ 11:15–13:15 │ bb_squeeze, vwap_reversion                        │
+  ├──────────────────────┼─────────────┼───────────────────────────────────────────────────┤
+  │ afternoon_push       │ 13:15–15:00 │ all strategies                                    │
+  ├──────────────────────┼─────────────┼───────────────────────────────────────────────────┤
+  │ closing              │ 15:00–15:30 │ exit only                                         │
+  └──────────────────────┴─────────────┴───────────────────────────────────────────────────┘
+
+  scorer.py — StrategyScorer
+
+  Arbitrates when multiple strategy signals fire simultaneously. Score = strategy.score(signal, filters) × insight_weight × filter_mult. Confluence bonus
+  (+0.15) if 2+ signals agree; conflict penalty (-0.1) if opposing.
+
+  broker_dhan.py — DhanBroker
+
+  - Paper mode: all orders simulated in memory
+  - Live mode: Dhan REST API via v2 DhanContext initialization
+  - Methods: place_order(), place_super_order() (entry+SL+target in one), modify_stop_loss(), get_ltp(), get_historical_intraday(), get_option_chain()
+  - _mock_option_chain(): realistic paper mode chain built around current price level
+
+  ---
+  Journal Layer (journal/)
+
+  logger.py — JournalLogger(output_dir)
+
+  Writes to:
+  - journal/notes/json/{date}.json — machine-readable (used by brain)
+  - journal/notes/{date}.md — human-readable markdown
+
+  Methods: log_entry(), log_exit(), log_day_summary(), get_recent_entries(n=10), get_recent_lessons(n=5)
+
+  reviewer.py — PostTradeReviewer
+
+  Post-trade AI analysis per trade. Returns: summary, entry_quality, exit_quality, what_worked, what_failed, lesson, strategy_note, market_read_accuracy.
+
+  ---
+  Lab Layer (lab/)
+
+  backtester.py — backtest_strategy(strategy_name, candle_data, daily_data, config, params_override)
+
+  Walks through historical 5-min candles day by day. Returns: win_rate, total_trades, avg_pnl, total_pnl, max_drawdown_pct, sharpe, trades_log,
+  lookback_days.
+
+  ranker.py — run_ranking(config, candle_data, daily_data)
+
+  Ranking formula: score = win_rate × sqrt(total_trades) — balances accuracy with sample size.
+  Saves to lab/rankings.json. Min 5 trades before a strategy is evaluated.
+
+  discoverer.py — StrategyDiscoverer
+
+  AI-proposes new strategies and validates them through the backtester before promoting.
+
+  ---
+  Scripts (Entry Points)
+
+  # Daily paper trading
+  python scripts/run_live.py --paper
+
+  # Live trading (confirms "YES I UNDERSTAND")
+  python scripts/run_live.py --live
+
+  # Historical simulation (5-year backtest)
+  python scripts/run_historical_simulation.py --csv data/banknifty_5min.csv --from 2020-01-01 --to 2024-12-31
+
+  # Skip AI (pure strategy signals, fast)
+  python scripts/run_historical_simulation.py --csv data.csv --no-ai
+
+  # Single strategy simulation
+  python scripts/run_historical_simulation.py --csv data.csv --strategy first_hour_verdict
+
+  # Manual strategy backtest
+  python scripts/run_backtest.py --all --days 60
+  python scripts/run_backtest.py --strategy gap_fill --days 30
+
+  # Fetch 5-year historical data
+  python scripts/fetch_data.py --from 2020-01-01 --to 2024-12-31 --output data/banknifty_5min.csv
+
+  # Nightly ranking (cron at 15:45)
+  python scripts/run_nightly.py
+
+  Environment variables required:
+  - DHAN_CLIENT_ID, DHAN_ACCESS_TOKEN — Dhan broker credentials
+  - ANTHROPIC_API_KEY — optional, only if using Anthropic backend directly
+
+  ---
+  Learning Loop
+
+  Day trades → Journal entries (JSON + Markdown)
+           ↓
+  Journal (last 10 days) → Fed into next day's thesis prompt
+           ↓
+  Strategy backtests → rankings.json (updated every 20 sim days)
+           ↓
+  Rankings → Fed into thesis prompt (top 3 strategies highlighted)
+           ↓
+  AI post-trade reviews → Lessons extracted → Fed into thesis
+           ↓
+  Better thesis → Better trades → Better journal (cycle continues)
+
+  ---
+  Key Design Decisions
+
+  1. AI makes decisions, Python enforces them — AI cannot bypass SL/RR/phase/capital gates
+  2. Full cost model — 0.4–0.5% round-trip prevents overstating backtest profits
+  3. Paper mode by default — dhanhq package not required; install only when going live
+  4. Plugin architecture — indicators and brokers are swappable
+  5. Simulation reuses live code — run_simulation_day() uses the same _run_one_tick() as live trading
+  6. Max 5 params per strategy — prevents overfitting
+  7. Force-close at 15:15 — no overnight risk ever
+  8. Minimum 5 trades before ranking — prevents luck from gaming rankings

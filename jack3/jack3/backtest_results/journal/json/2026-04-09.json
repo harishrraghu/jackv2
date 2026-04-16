@@ -1,0 +1,28 @@
+{
+  "date": "2026-04-09",
+  "bias_assessment": "BEARISH",
+  "day_character": "volatile",
+  "trade": {
+    "action": "ENTER_SHORT",
+    "entry_time": "10:35",
+    "entry_price": 55435,
+    "stop_loss": 55568,
+    "target": 55235,
+    "risk_pts": 133,
+    "reward_pts": 200,
+    "rr_ratio": 1.5,
+    "exit_time": "11:20",
+    "exit_price": 55235,
+    "outcome": "target_hit",
+    "pnl_pts": 200
+  },
+  "key_levels": {
+    "support": 54627,
+    "resistance": 55583,
+    "vwap_at_entry": 55398
+  },
+  "what_worked": "Short entry at the high of the 10:35 candle captured the ensuing down move with a clear stop above the swing high.",
+  "what_failed": "Early bullish bias was misleading; price quickly turned lower after the 10:30 peak.",
+  "lesson": "Watch for pull\u2011backs after short\u2011term highs in volatile sessions and place stops just above the recent swing high.",
+  "confidence": 0.78
+}

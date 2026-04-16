@@ -1,0 +1,28 @@
+{
+  "date": "2026-03-16",
+  "bias_assessment": "NEUTRAL",
+  "day_character": "volatile",
+  "trade": {
+    "action": "NO_TRADE",
+    "entry_time": null,
+    "entry_price": null,
+    "stop_loss": null,
+    "target": null,
+    "risk_pts": null,
+    "reward_pts": null,
+    "rr_ratio": null,
+    "exit_time": null,
+    "exit_price": null,
+    "outcome": "no_trade",
+    "pnl_pts": null
+  },
+  "key_levels": {
+    "support": null,
+    "resistance": null,
+    "vwap_at_entry": null
+  },
+  "what_worked": "None \u2013 price action did not provide a clear entry with acceptable stop\u2011loss distance before 13:30.",
+  "what_failed": "Early bullish spikes and later strong upside were all after the 13:30 cutoff, making them ineligible.",
+  "lesson": "When the day\u2019s main move comes late, respect the 13:30 entry rule and avoid forcing a trade.",
+  "confidence": 0.6
+}

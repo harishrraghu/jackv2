@@ -1,0 +1,38 @@
+{
+  "date": "2026-03-16",
+  "thesis": {
+    "direction": "NEUTRAL",
+    "confidence": 0.5,
+    "reasoning": "Gift Nifty and S&P 500 are flat at +0.00%, while the weighted bias score of 0.00 confirms a lack of directional momentum. All pre-market signals indicate a range-bound open.",
+    "key_factors": [
+      "Gift Nifty +0.00%",
+      "FII net buying Rs.0cr",
+      "India VIX 0.0"
+    ],
+    "suggested_strategy": null,
+    "risk_note": "Flat global cues and zero FII activity suggest extremely low liquidity or interest; avoid entering before clarity emerges.",
+    "expected_range_pts": 250,
+    "bias_entry_after": "10:15"
+  },
+  "thesis_accuracy": "no_trades",
+  "trades": [],
+  "tick_decisions_count": 72,
+  "daily_summary": {
+    "total_pnl": 0,
+    "trades_taken": 0,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0
+  },
+  "capital": {
+    "current_capital": 1000000.0,
+    "peak_capital": 1000000.0,
+    "daily_pnl": 0.0,
+    "trades_today": 0,
+    "has_position": false,
+    "drawdown": {
+      "current_drawdown_pct": 0.0,
+      "daily_drawdown_pct": 0.0
+    }
+  }
+}

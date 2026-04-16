@@ -1,0 +1,126 @@
+{
+  "date": "2026-03-17",
+  "thesis": {
+    "direction": "BEARISH",
+    "confidence": 0.52,
+    "reasoning": "The overall_bias is BEARISH with a weighted_bias_score of -0.40, although bullish global news and a significant -1.78% drop in USD/INR suggest potential upward pressure.",
+    "key_factors": [
+      "weighted_bias_score -0.40",
+      "india_vix 20.5",
+      "usd_inr_change -1.78%"
+    ],
+    "suggested_strategy": "first_hour_verdict",
+    "risk_note": "High VIX of 20.5 and record highs in US markets create a high-risk environment; avoid entry before price discovery.",
+    "expected_range_pts": 500,
+    "bias_entry_after": "10:15"
+  },
+  "thesis_accuracy": "1/3_correct",
+  "trades": [
+    {
+      "strategy": "ai_direct",
+      "direction": "SHORT",
+      "entry_price": 54338.0,
+      "exit_price": 54457.05,
+      "stop_loss": 54457.0,
+      "target": 54158.0,
+      "quantity": 30,
+      "entry_time": "10:30",
+      "entry_date": null,
+      "exit_time": "10:45",
+      "exit_date": null,
+      "exit_reason": "stop_hit",
+      "gross_pnl": -3571.5,
+      "costs": {
+        "brokerage_entry": 489.04,
+        "brokerage_exit": 490.11,
+        "stt": 203.77,
+        "slippage": 3.0,
+        "stamp_duty": 48.9,
+        "gst": 176.25,
+        "total_costs": 1411.08
+      },
+      "net_pnl": -4982.58,
+      "confidence": 0.65,
+      "reason": "Setup C: Price 54338 crossed below VWAP 54376.4 with RSI 50.75 in 48-60 range",
+      "metadata": {},
+      "order_id": "PAPER_000001"
+    },
+    {
+      "strategy": "ai_direct",
+      "direction": "SHORT",
+      "entry_price": 54369.0,
+      "exit_price": 54225.15,
+      "stop_loss": 54488.46,
+      "target": 54189.81,
+      "quantity": 30,
+      "entry_time": "11:10",
+      "entry_date": null,
+      "exit_time": "11:25",
+      "exit_date": null,
+      "exit_reason": "ai_exit",
+      "gross_pnl": 4315.5,
+      "costs": {
+        "brokerage_entry": 489.32,
+        "brokerage_exit": 488.03,
+        "stt": 203.88,
+        "slippage": 3.0,
+        "stamp_duty": 48.93,
+        "gst": 175.92,
+        "total_costs": 1409.09
+      },
+      "net_pnl": 2906.41,
+      "confidence": 0.52,
+      "reason": "Setup C: Price 54369 below VWAP 54394.93 and RSI 49.1 in 48-60 range. SL=1.1x ATR.",
+      "metadata": {},
+      "order_id": "PAPER_000002"
+    },
+    {
+      "strategy": "ai_direct",
+      "direction": "SHORT",
+      "entry_price": 54210.0,
+      "exit_price": 54375.4,
+      "stop_loss": 54380.65,
+      "target": 53954.03,
+      "quantity": 15,
+      "entry_time": "11:30",
+      "entry_date": null,
+      "exit_time": "12:05",
+      "exit_date": null,
+      "exit_reason": "ai_exit",
+      "gross_pnl": -2481.0,
+      "costs": {
+        "brokerage_entry": 243.94,
+        "brokerage_exit": 244.69,
+        "stt": 101.64,
+        "slippage": 1.5,
+        "stamp_duty": 24.39,
+        "gst": 87.95,
+        "total_costs": 704.13
+      },
+      "net_pnl": -3185.13,
+      "confidence": 0.75,
+      "reason": "Setup A: Price 54210 < VWAP 54380.65 and EMA 54363.54, RSI 40.59 confirms bearish trend",
+      "metadata": {},
+      "order_id": "PAPER_000003"
+    }
+  ],
+  "tick_decisions_count": 75,
+  "daily_summary": {
+    "total_pnl": -5261.3,
+    "trades_taken": 3,
+    "wins": 1,
+    "losses": 2,
+    "win_rate": 33.3
+  },
+  "capital": {
+    "current_capital": 994738.7,
+    "peak_capital": 1000000.0,
+    "daily_pnl": -5261.3,
+    "trades_today": 3,
+    "has_position": false,
+    "drawdown": {
+      "current_drawdown_pct": 0.5261,
+      "daily_drawdown_pct": 0.5289
+    }
+  }
+}

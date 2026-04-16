@@ -1,0 +1,97 @@
+{
+  "date": "2026-03-18",
+  "thesis": {
+    "direction": "BEARISH",
+    "confidence": 0.58,
+    "reasoning": "Overall bias is BEARISH with a weighted score of -0.37 and high VIX at 20.5, although USD/INR at -1.80% and S&P 500 at +0.62% provide bullish divergence.",
+    "key_factors": [
+      "Weighted bias -0.37",
+      "India VIX 20.5",
+      "USD/INR -1.80%"
+    ],
+    "suggested_strategy": "first_hour_verdict",
+    "risk_note": "RBI Board Meeting outcome regarding surplus transfer and high VIX suggest extreme intraday volatility.",
+    "expected_range_pts": 550,
+    "bias_entry_after": "10:15"
+  },
+  "thesis_accuracy": "1/2_correct",
+  "trades": [
+    {
+      "strategy": "ai_direct",
+      "direction": "SHORT",
+      "entry_price": 54938.0,
+      "exit_price": 54751.060000000005,
+      "stop_loss": 55062.66,
+      "target": 54751.01,
+      "quantity": 30,
+      "entry_time": "09:50",
+      "entry_date": null,
+      "exit_time": "10:05",
+      "exit_date": null,
+      "exit_reason": "target_hit",
+      "gross_pnl": 5608.2,
+      "costs": {
+        "brokerage_entry": 494.44,
+        "brokerage_exit": 492.76,
+        "stt": 206.02,
+        "slippage": 3.0,
+        "stamp_duty": 49.44,
+        "gst": 177.7,
+        "total_costs": 1423.36
+      },
+      "net_pnl": 4184.84,
+      "confidence": 0.65,
+      "reason": "Setup C triggered: Price 54938 crossed below VWAP 54983.98 with RSI 55.65 in Bearish thesis.",
+      "metadata": {},
+      "order_id": "PAPER_000001"
+    },
+    {
+      "strategy": "ai_direct",
+      "direction": "SHORT",
+      "entry_price": 54787.0,
+      "exit_price": 54897.05,
+      "stop_loss": 54897.0,
+      "target": 54622.0,
+      "quantity": 45,
+      "entry_time": "10:10",
+      "entry_date": null,
+      "exit_time": "10:20",
+      "exit_date": null,
+      "exit_reason": "stop_hit",
+      "gross_pnl": -4952.25,
+      "costs": {
+        "brokerage_entry": 739.62,
+        "brokerage_exit": 741.11,
+        "stt": 308.18,
+        "slippage": 4.5,
+        "stamp_duty": 73.96,
+        "gst": 266.53,
+        "total_costs": 2133.91
+      },
+      "net_pnl": -7086.16,
+      "confidence": 0.58,
+      "reason": "Price below VWAP (54942) & EMA_20 (54858), RSI 47.25 aligns with Short Setup A",
+      "metadata": {},
+      "order_id": "PAPER_000002"
+    }
+  ],
+  "tick_decisions_count": 74,
+  "daily_summary": {
+    "total_pnl": -2901.32,
+    "trades_taken": 2,
+    "wins": 1,
+    "losses": 1,
+    "win_rate": 50.0
+  },
+  "capital": {
+    "current_capital": 997098.68,
+    "peak_capital": 1004184.84,
+    "daily_pnl": -2901.32,
+    "trades_today": 2,
+    "has_position": false,
+    "drawdown": {
+      "current_drawdown_pct": 0.7057,
+      "daily_drawdown_pct": 0.291
+    }
+  }
+}

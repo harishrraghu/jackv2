@@ -1,0 +1,28 @@
+{
+  "date": "2026-03-24",
+  "bias_assessment": "BULLISH",
+  "day_character": "trending",
+  "trade": {
+    "action": "ENTER_LONG",
+    "entry_time": "12:30",
+    "entry_price": 52471,
+    "stop_loss": 52328,
+    "target": 52686,
+    "risk_pts": 143,
+    "reward_pts": 215,
+    "rr_ratio": 1.51,
+    "exit_time": "12:45",
+    "exit_price": 52686,
+    "outcome": "target_hit",
+    "pnl_pts": 215
+  },
+  "key_levels": {
+    "support": 52218,
+    "resistance": 52887,
+    "vwap_at_entry": 52165
+  },
+  "what_worked": "Breakout above recent high with price above EMA20 and strong RSI gave a clean long signal.",
+  "what_failed": "None \u2013 trade proceeded as planned.",
+  "lesson": "Enter on a clear breakout and set a tight stop just below the breakout candle to achieve a good R:R.",
+  "confidence": 0.78
+}

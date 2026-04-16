@@ -1,0 +1,849 @@
+{
+  "2026-03-16": {
+    "09:15": {
+      "action": "WAIT",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Market open volatility; awaiting stabilization."
+    },
+    "09:20": {
+      "action": "WAIT",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Opening range formation; indicators unavailable."
+    },
+    "09:25": {
+      "action": "WAIT",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Pre-09:30 period; standard algorithm caution."
+    },
+    "09:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Insufficient data: RSI, EMA20, and VWAP missing for entry."
+    },
+    "09:35": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "PCR 1.0 is neutral; missing technical confirmation."
+    },
+    "09:40": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No clear signal; technical indicators unavailable."
+    },
+    "09:45": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Sideways movement; indicators still None."
+    },
+    "09:50": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Missing ATR/VWAP; entry conditions cannot be met."
+    },
+    "09:55": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No signal; awaiting technical indicator population."
+    },
+    "10:00": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Technical parameters None; strictly following entry rules."
+    },
+    "10:05": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Price action choppy; missing RSI/EMA confirmation."
+    },
+    "10:10": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No entry trigger found."
+    },
+    "10:15": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Index showing weakness but indicators missing for Short entry."
+    },
+    "10:20": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No signal; RSI and EMA data unavailable."
+    },
+    "10:25": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Downward trend visible but lacks required indicators."
+    },
+    "10:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Price below 53500; indicators still None."
+    },
+    "10:35": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Awaiting technical confirmation."
+    },
+    "10:40": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No trade signal."
+    },
+    "10:45": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Indicators None; standing aside."
+    },
+    "10:50": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Market volatile, no clear technical signal."
+    },
+    "10:55": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Technical data required for entry is missing."
+    },
+    "11:00": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No signal."
+    },
+    "11:05": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No signal."
+    },
+    "11:10": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No signal."
+    },
+    "11:15": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Sudden price spike; indicators None, no entry."
+    },
+    "11:20": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Awaiting indicators for confirmation."
+    },
+    "11:25": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Neutral sentiment; PCR 1.0."
+    },
+    "11:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No signal."
+    },
+    "11:35": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No signal."
+    },
+    "11:40": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No signal."
+    },
+    "11:45": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Price consolidating; indicators None."
+    },
+    "11:50": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No signal."
+    },
+    "11:55": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No signal."
+    },
+    "12:00": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No signal."
+    },
+    "12:05": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No signal."
+    },
+    "12:10": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No signal."
+    },
+    "12:15": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No signal."
+    },
+    "12:20": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No signal."
+    },
+    "12:25": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No signal."
+    },
+    "12:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No signal."
+    },
+    "12:35": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No signal."
+    },
+    "12:40": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No signal."
+    },
+    "12:45": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No signal."
+    },
+    "12:50": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No signal."
+    },
+    "12:55": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No signal."
+    },
+    "13:00": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No signal."
+    },
+    "13:05": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No signal."
+    },
+    "13:10": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No signal."
+    },
+    "13:15": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No signal."
+    },
+    "13:20": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No signal."
+    },
+    "13:25": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "No signal."
+    },
+    "13:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Cutoff time reached; no entries."
+    },
+    "13:35": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Post-cutoff period."
+    },
+    "13:40": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Post-cutoff period."
+    },
+    "13:45": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Post-cutoff period."
+    },
+    "13:50": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Post-cutoff period."
+    },
+    "13:55": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Post-cutoff period."
+    },
+    "14:00": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Post-cutoff period."
+    },
+    "14:05": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Post-cutoff period."
+    },
+    "14:10": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Post-cutoff period."
+    },
+    "14:15": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Post-cutoff period."
+    },
+    "14:20": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Post-cutoff period."
+    },
+    "14:25": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Post-cutoff period."
+    },
+    "14:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Post-cutoff period."
+    },
+    "14:35": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Post-cutoff period."
+    },
+    "14:40": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Post-cutoff period."
+    },
+    "14:45": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Post-cutoff period."
+    },
+    "14:50": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Post-cutoff period."
+    },
+    "14:55": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Post-cutoff period."
+    },
+    "15:00": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Post-cutoff period."
+    },
+    "15:05": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Post-cutoff period."
+    },
+    "15:10": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Post-cutoff period."
+    },
+    "15:15": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Post-cutoff period."
+    },
+    "15:20": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Post-cutoff period."
+    },
+    "15:25": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.3,
+      "reasoning": "Market closing."
+    }
+  },
+  "2026-03-17": {
+    "09:15": {
+      "action": "WAIT",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BULLISH",
+      "confidence": 0.65,
+      "reasoning": "Opening volatility; awaiting indicator stabilization."
+    },
+    "09:20": {
+      "action": "WAIT",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BULLISH",
+      "confidence": 0.65,
+      "reasoning": "Opening gap down recovery."
+    },
+    "09:25": {
+      "action": "WAIT",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BULLISH",
+      "confidence": 0.65,
+      "reasoning": "Pre-09:30 wait."
+    },
+    "09:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BULLISH",
+      "confidence": 0.65,
+      "reasoning": "No technical indicators available for confirmation."
+    },
+    "13:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BULLISH",
+      "confidence": 0.65,
+      "reasoning": "Entry cutoff reached."
+    },
+    "15:25": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BULLISH",
+      "confidence": 0.65,
+      "reasoning": "Market closing."
+    }
+  },
+  "2026-03-18": {
+    "09:15": {
+      "action": "WAIT",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BULLISH",
+      "confidence": 0.65,
+      "reasoning": "Opening volatility."
+    },
+    "09:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BULLISH",
+      "confidence": 0.65,
+      "reasoning": "RSI/EMA indicators missing; entry conditions not met."
+    },
+    "13:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BULLISH",
+      "confidence": 0.65,
+      "reasoning": "Cutoff reached."
+    },
+    "15:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BULLISH",
+      "confidence": 0.65,
+      "reasoning": "Market closed."
+    }
+  },
+  "2026-03-19": {
+    "09:15": {
+      "action": "WAIT",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BULLISH",
+      "confidence": 0.65,
+      "reasoning": "High opening volatility."
+    },
+    "09:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BULLISH",
+      "confidence": 0.65,
+      "reasoning": "No technical signal."
+    },
+    "13:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BULLISH",
+      "confidence": 0.65,
+      "reasoning": "Cutoff reached."
+    },
+    "15:25": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BULLISH",
+      "confidence": 0.65,
+      "reasoning": "Market close."
+    }
+  },
+  "2026-03-20": {
+    "09:15": {
+      "action": "WAIT",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.16,
+      "reasoning": "Opening volatility."
+    },
+    "09:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.16,
+      "reasoning": "Indicators None; no entry trigger."
+    },
+    "13:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.16,
+      "reasoning": "Cutoff reached."
+    },
+    "15:25": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "NEUTRAL",
+      "confidence": 0.16,
+      "reasoning": "Market close."
+    }
+  }
+}

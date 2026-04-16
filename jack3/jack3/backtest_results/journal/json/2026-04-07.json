@@ -1,0 +1,28 @@
+{
+  "date": "2026-04-07",
+  "bias_assessment": "BULLISH",
+  "day_character": "trending",
+  "trade": {
+    "action": "ENTER_LONG",
+    "entry_time": "11:55",
+    "entry_price": 52277,
+    "stop_loss": 52194,
+    "target": 52477,
+    "risk_pts": 83,
+    "reward_pts": 200,
+    "rr_ratio": 2.41,
+    "exit_time": "13:35",
+    "exit_price": 52477,
+    "outcome": "target_hit",
+    "pnl_pts": 200
+  },
+  "key_levels": {
+    "support": 52194,
+    "resistance": 52778,
+    "vwap_at_entry": 52117
+  },
+  "what_worked": "Long entry after price moved above EMA20 with RSI >60 and strong buying pressure.",
+  "what_failed": "No false breakout; stop was set at the candle low, respecting risk limits.",
+  "lesson": "Even in a bullish day, wait for a confirming candle above EMA before entering.",
+  "confidence": 0.77
+}

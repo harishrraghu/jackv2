@@ -1,0 +1,831 @@
+{
+  "2026-04-01": {
+    "09:15": {
+      "action": "WAIT",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Opening volatility. Market open wait period."
+    },
+    "09:20": {
+      "action": "WAIT",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Opening volatility. Market open wait period."
+    },
+    "09:25": {
+      "action": "WAIT",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Opening volatility. Market open wait period."
+    },
+    "09:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Missing technical indicators (RSI/EMA/VWAP) to confirm entry rules."
+    },
+    "09:35": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "09:40": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "09:45": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "09:50": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "09:55": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "10:00": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "10:05": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "10:10": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "10:15": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "10:20": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "10:25": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "10:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "10:35": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "10:40": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "10:45": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "10:50": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "10:55": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "11:00": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "11:05": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "11:10": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "11:15": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "11:20": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "11:25": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "11:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "11:35": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "11:40": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "11:45": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "11:50": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "11:55": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "12:00": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "12:05": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "12:10": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "12:15": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "12:20": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "12:25": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "12:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "12:35": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "12:40": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "12:45": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "12:50": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "12:55": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "13:00": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "13:05": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "13:10": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "13:15": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "13:20": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "13:25": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Indicators are None. Cannot confirm entry per strategy rules."
+    },
+    "13:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Post-13:30 rule: Only HOLD or EXIT."
+    },
+    "13:35": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Post-13:30 rule: Only HOLD or EXIT."
+    },
+    "13:40": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Post-13:30 rule: Only HOLD or EXIT."
+    },
+    "13:45": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Post-13:30 rule: Only HOLD or EXIT."
+    },
+    "13:50": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Post-13:30 rule: Only HOLD or EXIT."
+    },
+    "13:55": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Post-13:30 rule: Only HOLD or EXIT."
+    },
+    "14:00": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Post-13:30 rule: Only HOLD or EXIT."
+    },
+    "14:05": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Post-13:30 rule: Only HOLD or EXIT."
+    },
+    "14:10": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Post-13:30 rule: Only HOLD or EXIT."
+    },
+    "14:15": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Post-13:30 rule: Only HOLD or EXIT."
+    },
+    "14:20": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Post-13:30 rule: Only HOLD or EXIT."
+    },
+    "14:25": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Post-13:30 rule: Only HOLD or EXIT."
+    },
+    "14:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Post-13:30 rule: Only HOLD or EXIT."
+    },
+    "14:35": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Post-13:30 rule: Only HOLD or EXIT."
+    },
+    "14:40": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Post-13:30 rule: Only HOLD or EXIT."
+    },
+    "14:45": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Post-13:30 rule: Only HOLD or EXIT."
+    },
+    "14:50": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Post-13:30 rule: Only HOLD or EXIT."
+    },
+    "14:55": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Post-13:30 rule: Only HOLD or EXIT."
+    },
+    "15:00": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Post-13:30 rule: Only HOLD or EXIT."
+    },
+    "15:05": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Post-13:30 rule: Only HOLD or EXIT."
+    },
+    "15:10": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Post-13:30 rule: Only HOLD or EXIT."
+    },
+    "15:15": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Post-13:30 rule: Only HOLD or EXIT."
+    },
+    "15:20": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Post-13:30 rule: Only HOLD or EXIT."
+    },
+    "15:25": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Post-13:30 rule: Only HOLD or EXIT."
+    }
+  },
+  "2026-04-02": {
+    "09:15": {
+      "action": "WAIT",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Market open wait period."
+    },
+    "10:00": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "No indicators provided. Cannot confirm entry."
+    },
+    "13:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Post-13:30 only HOLD/EXIT."
+    },
+    "15:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "End of day."
+    }
+  },
+  "2026-04-06": {
+    "09:15": {
+      "action": "WAIT",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Opening volatility. Wait period."
+    },
+    "12:00": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Strategy requires RSI/EMA/VWAP; all are None."
+    },
+    "13:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "Post-13:30 IST limit reached."
+    },
+    "15:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.65,
+      "reasoning": "End of session."
+    }
+  },
+  "2026-04-07": {
+    "09:15": {
+      "action": "WAIT",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.36,
+      "reasoning": "Market open wait period."
+    },
+    "11:00": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.36,
+      "reasoning": "No technical signals available (indicators are None)."
+    },
+    "13:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.36,
+      "reasoning": "Post-13:30 IST limit reached."
+    },
+    "15:25": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BEARISH",
+      "confidence": 0.36,
+      "reasoning": "End of session."
+    }
+  },
+  "2026-04-08": {
+    "09:15": {
+      "action": "WAIT",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BULLISH",
+      "confidence": 0.65,
+      "reasoning": "Market open wait period."
+    },
+    "09:45": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BULLISH",
+      "confidence": 0.65,
+      "reasoning": "RSI/EMA/VWAP are None. Cannot confirm entry criteria."
+    },
+    "13:30": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BULLISH",
+      "confidence": 0.65,
+      "reasoning": "Post-13:30 IST limit reached."
+    },
+    "15:25": {
+      "action": "HOLD",
+      "entry_price": null,
+      "stop_loss": null,
+      "target": null,
+      "thesis_update": "BULLISH",
+      "confidence": 0.65,
+      "reasoning": "End of session."
+    }
+  }
+}

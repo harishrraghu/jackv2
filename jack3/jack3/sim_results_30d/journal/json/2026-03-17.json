@@ -1,0 +1,38 @@
+{
+  "date": "2026-03-17",
+  "thesis": {
+    "direction": "NEUTRAL",
+    "confidence": 0.5,
+    "reasoning": "GIFT Nifty is flat at 0.00% and FII net buying is at Rs.0cr, suggesting a lack of institutional direction and a sideways open. Weighted bias score of 0.00 reinforces the neutral outlook.",
+    "key_factors": [
+      "GIFT Nifty at +0.00%",
+      "FII net buying of Rs.0cr",
+      "Weighted bias score of 0.00"
+    ],
+    "suggested_strategy": "first_hour_verdict",
+    "risk_note": "All major signals are neutral; wait for the first hour range breakout before committing to a direction.",
+    "expected_range_pts": 300,
+    "bias_entry_after": "10:15"
+  },
+  "thesis_accuracy": "no_trades",
+  "trades": [],
+  "tick_decisions_count": 72,
+  "daily_summary": {
+    "total_pnl": 0,
+    "trades_taken": 0,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0
+  },
+  "capital": {
+    "current_capital": 1000000.0,
+    "peak_capital": 1000000.0,
+    "daily_pnl": 0.0,
+    "trades_today": 0,
+    "has_position": false,
+    "drawdown": {
+      "current_drawdown_pct": 0.0,
+      "daily_drawdown_pct": 0.0
+    }
+  }
+}

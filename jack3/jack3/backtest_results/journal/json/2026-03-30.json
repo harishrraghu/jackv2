@@ -1,0 +1,28 @@
+{
+  "date": "2026-03-30",
+  "bias_assessment": "BEARISH",
+  "day_character": "volatile",
+  "trade": {
+    "action": "ENTER_SHORT",
+    "entry_time": "10:20",
+    "entry_price": 51004,
+    "stop_loss": 51060,
+    "target": 50920,
+    "risk_pts": 56,
+    "reward_pts": 84,
+    "rr_ratio": 1.5,
+    "exit_time": "10:45",
+    "exit_price": 50920,
+    "outcome": "target_hit",
+    "pnl_pts": 84
+  },
+  "key_levels": {
+    "support": 50105,
+    "resistance": 51624,
+    "vwap_at_entry": 51125
+  },
+  "what_worked": "RSI below 40 and price below EMA20 gave a clear short signal; stop\u2011loss was within limits and target was reached quickly.",
+  "what_failed": "None \u2013 trade executed as expected.",
+  "lesson": "Early\u2011session short entries with low RSI and price under EMA20 can yield high R:R if stops are placed conservatively.",
+  "confidence": 0.81
+}

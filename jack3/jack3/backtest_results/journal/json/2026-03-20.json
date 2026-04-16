@@ -1,0 +1,28 @@
+{
+  "date": "2026-03-20",
+  "bias_assessment": "BEARISH",
+  "day_character": "volatile",
+  "trade": {
+    "action": "NO_TRADE",
+    "entry_time": null,
+    "entry_price": null,
+    "stop_loss": null,
+    "target": null,
+    "risk_pts": null,
+    "reward_pts": null,
+    "rr_ratio": null,
+    "exit_time": null,
+    "exit_price": null,
+    "outcome": "no_trade",
+    "pnl_pts": null
+  },
+  "key_levels": {
+    "support": null,
+    "resistance": null,
+    "vwap_at_entry": null
+  },
+  "what_worked": "None \u2013 although the day opened bullish, the subsequent decline did not produce a short entry with a stop \u2264150\u202fpts before 13:30.",
+  "what_failed": "Previous highs were too far above the decline to meet the stop\u2011loss distance rule.",
+  "lesson": "When the market opens impulsively high, wait for a retracement that creates a tight stop before taking a short.",
+  "confidence": 0.6
+}
